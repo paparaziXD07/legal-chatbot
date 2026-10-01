@@ -294,35 +294,39 @@ export default function LawView({ isAdmin, onNavigateToLawManagement }) {
     if (!q) return matchesCat;
 
     const qNorm = normalizeThaiDigits(q);
-    // กรณีผู้ใช้ค้นเป็นเลขมาตรา เช่น "มาตรา 70", "ม.70", "70"
-    const secNumQuery = qNorm.replace(/^(มาตรา|ม\.)\s*/i, '').trim();
+    // กรณีผู้ใช้ค้นเป็นเลขมาตรา เช่น "มาตรา 50", "ม.50", "50", "๕๐"
+    const strippedSec = qNorm.replace(/^(มาตรา|ม\.|section|sec)\s*/i, '').trim();
+    const isSectionNumberQuery = /^\d+(\/\d+)?$/.test(strippedSec);
 
-    const secRaw = (l.section ? String(l.section) : '').toLowerCase();
-    const secNorm = normalizeThaiDigits(secRaw);
+    const secRaw = String(l.section || '').trim();
+    const secNorm = normalizeThaiDigits(secRaw).replace(/^(มาตรา|ม\.)\s*/i, '').trim();
+
+    // 1. ถ้าผู้ใช้ระบุเป็นเลขมาตราโดยตรง (เช่น 50, 70, มาตรา 14) ให้ค้นเฉพาะเลขมาตรานั้นๆ เท่านั้น
+    if (isSectionNumberQuery) {
+      const matchesSection = (secNorm === strippedSec || secNorm.startsWith(strippedSec + '/'));
+      return matchesCat && matchesSection;
+    }
+
+    // 2. ถ้าเป็นคำค้นหาทั่วไป (เช่น ข้อความ, หัวข้อ, คำสำคัญ) ให้ค้นหาเฉพาะเนื้อหาของมาตรานั้นๆ
+    // หมายเหตุ: ไม่นำไปเทียบกับชื่อเต็มของ พ.ร.บ. หรือปี พ.ศ. (เช่น 2550) เพื่อไม่ให้ดึงมาตราทั้งหมดขึ้นมา
+    const qLower = qNorm.toLowerCase();
     const secFormatted = formatSection(l.section).toLowerCase();
-    const lawInfo = getLawBadgeInfo(l.cat);
+    const titleNorm = normalizeThaiDigits(l.title || '').toLowerCase();
+    const textNorm = normalizeThaiDigits(l.text || '').toLowerCase();
+    const simpleNorm = normalizeThaiDigits(l.simple || '').toLowerCase();
+    const penaltyNorm = normalizeThaiDigits(l.penalty || '').toLowerCase();
+    const keywordsNorm = Array.isArray(l.keywords)
+      ? l.keywords.map((k) => normalizeThaiDigits(String(k)).toLowerCase())
+      : [];
 
-    // ตรวจสอบเลขมาตราโดยตรง
-    const matchesSection = secNumQuery && (
-      secRaw === secNumQuery ||
-      secNorm === secNumQuery ||
-      secRaw.startsWith(secNumQuery + '/') ||
-      secNorm.startsWith(secNumQuery + '/') ||
-      secFormatted.includes(secNumQuery)
-    );
-
-    const matchesQuery = matchesSection ||
-      secRaw.includes(q) ||
-      secNorm.includes(qNorm) ||
-      secFormatted.includes(q) ||
-      lawInfo.label.toLowerCase().includes(q) ||
-      lawInfo.shortName.toLowerCase().includes(q) ||
-      lawInfo.fullName.toLowerCase().includes(q) ||
-      (l.title && l.title.toLowerCase().includes(q)) ||
-      (l.text && l.text.toLowerCase().includes(q)) ||
-      (l.simple && l.simple.toLowerCase().includes(q)) ||
-      (l.penalty && l.penalty.toLowerCase().includes(q)) ||
-      (l.keywords && Array.isArray(l.keywords) && l.keywords.some((k) => typeof k === 'string' && k.toLowerCase().includes(q)));
+    const matchesQuery =
+      secNorm === strippedSec ||
+      secFormatted.includes(qLower) ||
+      titleNorm.includes(qLower) ||
+      textNorm.includes(qLower) ||
+      simpleNorm.includes(qLower) ||
+      penaltyNorm.includes(qLower) ||
+      keywordsNorm.some((k) => k.includes(qLower));
 
     return matchesCat && matchesQuery;
   });

@@ -60,3 +60,17 @@ export function getLawBadgeInfo(cat) {
     badgeBg: '#7A1F2B'
   };
 }
+ 
+/**
+ * แปลงเลขไทยเป็นเลขอารบิกสำหรับค้นหา เช่น "๗๐" -> "70"
+ * @param {string} text 
+ * @returns {string}
+ */
+export function normalizeThaiDigits(text) {
+  if (!text) return '';
+  const thaiDigits = ['๐', '๑', '๒', '๓', '๔', '๕', '๖', '๗', '๘', '๙'];
+  return String(text).replace(/[๐-๙]/g, (ch) => {
+    const idx = thaiDigits.indexOf(ch);
+    return idx !== -1 ? String(idx) : ch;
+  });
+}

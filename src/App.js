@@ -15,6 +15,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('chat');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [lawSearchTarget, setLawSearchTarget] = useState('');
 
   useEffect(() => {
     const savedIsAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -29,12 +30,23 @@ export default function App() {
     setIsAdmin(false);
   };
 
+  const handleNavigateToLaw = (targetSection = '') => {
+    setLawSearchTarget(targetSection);
+    setActiveTab('law');
+  };
+
   const renderView = () => {
     switch (activeTab) {
       case 'chat':
         return null; // Handled by ChatView component
       case 'law':
-        return <LawView isAdmin={isAdmin} onNavigateToLawManagement={() => setActiveTab('admin-laws')} />;
+        return (
+          <LawView
+            isAdmin={isAdmin}
+            initialSearch={lawSearchTarget}
+            onNavigateToLawManagement={() => setActiveTab('admin-laws')}
+          />
+        );
       case 'admin-laws':
         return <AdminLawManagementView isAdmin={isAdmin} onOpenLoginModal={() => setIsLoginModalOpen(true)} />;
       case 'faq':
@@ -52,7 +64,12 @@ export default function App() {
     <div className="app">
       <Navbar
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tab) => {
+          if (tab !== 'law') {
+            setLawSearchTarget('');
+          }
+          setActiveTab(tab);
+        }}
         isAdmin={isAdmin}
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
         onLogout={handleLogout}
@@ -65,7 +82,10 @@ export default function App() {
       <Footer />
 
       {/* Floating Pop Chat component & main chat hero mounted persistently */}
-      <ChatView activeTab={activeTab} />
+      <ChatView
+        activeTab={activeTab}
+        onNavigateToLaw={handleNavigateToLaw}
+      />
 
       <AdminLoginModal
         isOpen={isLoginModalOpen}

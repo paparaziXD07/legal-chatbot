@@ -463,6 +463,44 @@ const s = {
     fontFamily: "'Sarabun', sans-serif",
     fontWeight: 600,
     transition: 'all .15s ease'
+  },
+  readLawNavBox: {
+    marginTop: 10,
+    paddingTop: 8,
+    borderTop: '1px dashed #D5C7B0',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6
+  },
+  readLawTitle: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: '#591622',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    fontFamily: "'Noto Serif Thai', serif"
+  },
+  readLawBtnsWrap: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 6
+  },
+  navToLawBtn: {
+    background: '#FFF8EB',
+    color: '#7A1F2B',
+    border: '1.2px solid #C9BBA0',
+    borderRadius: 16,
+    padding: '5px 13px',
+    fontSize: 12,
+    fontWeight: 600,
+    fontFamily: "'Sarabun', sans-serif",
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    transition: 'all .15s ease',
+    boxShadow: '0 2px 5px rgba(122,31,43,0.06)'
   }
 };
 
@@ -621,7 +659,26 @@ export const STYLE_OPTIONS = [
   { id: 'friendly', label: '🤝 เป็นกันเอง', desc: 'ภาษาเข้าใจง่าย ให้กำลังใจและแนะแนวทางทีละสเต็ป' }
 ];
 
-export default function ChatView({ activeTab, renderHeroOnly = false }) {
+function extractCitedSections(m) {
+  if (!m) return [];
+  const sections = new Set();
+  if (m.section) {
+    const clean = String(m.section).replace(/^(มาตรา|ม\.)\s*/i, '').trim();
+    if (clean) sections.add(clean);
+  }
+  if (m.text) {
+    const regex = /(?:มาตรา|ม\.)\s*([0-9๑-๙]+(?:\/[0-9๑-๙]+)?)/gi;
+    let match;
+    while ((match = regex.exec(m.text)) !== null) {
+      if (match[1]) {
+        sections.add(match[1].trim());
+      }
+    }
+  }
+  return Array.from(sections);
+}
+
+export default function ChatView({ activeTab, renderHeroOnly = false, onNavigateToLaw }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedModel] = useState('gpt-4o-mini');
   const [responseStyle, setResponseStyle] = useState('adaptive');
@@ -878,6 +935,71 @@ export default function ChatView({ activeTab, renderHeroOnly = false }) {
                             <strong>บทกำหนดโทษ:</strong> {m.penalty}
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* ── ตัวนำทางไปอ่านกฎหมายฉบับเต็มในฐานข้อมูลกฎหมาย ── */}
+                    {!m.isWelcome && (
+                      <div style={s.readLawNavBox}>
+                        <div style={s.readLawTitle}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7A1F2B" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                          </svg>
+                          <span>ตัวนำทางอ่านกฎหมายฉบับเต็มในฐานข้อมูล:</span>
+                        </div>
+                        <div style={s.readLawBtnsWrap}>
+                          {extractCitedSections(m).length > 0 ? (
+                            extractCitedSections(m).map((sec, sIdx) => (
+                              <button
+                                key={sIdx}
+                                type="button"
+                                style={s.navToLawBtn}
+                                onClick={() => {
+                                  if (onNavigateToLaw) {
+                                    onNavigateToLaw(sec);
+                                  }
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.background = '#7A1F2B';
+                                  e.currentTarget.style.color = '#fff';
+                                  e.currentTarget.style.borderColor = '#7A1F2B';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.background = '#FFF8EB';
+                                  e.currentTarget.style.color = '#7A1F2B';
+                                  e.currentTarget.style.borderColor = '#C9BBA0';
+                                }}
+                                title={`คลิกเพื่อเปิดอ่าน มาตรา ${sec} ฉบับเต็มในฐานข้อมูลกฎหมาย`}
+                              >
+                                📖 เปิดอ่านมาตรา {sec} ในคลัง ➔
+                              </button>
+                            ))
+                          ) : (
+                            <button
+                              type="button"
+                              style={s.navToLawBtn}
+                              onClick={() => {
+                                if (onNavigateToLaw) {
+                                  onNavigateToLaw('');
+                                }
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#7A1F2B';
+                                e.currentTarget.style.color = '#fff';
+                                e.currentTarget.style.borderColor = '#7A1F2B';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#FFF8EB';
+                                e.currentTarget.style.color = '#7A1F2B';
+                                e.currentTarget.style.borderColor = '#C9BBA0';
+                              }}
+                              title="คลิกเพื่อไปดูคลังกฎหมายทั้งหมด"
+                            >
+                              📚 เปิดดูฐานข้อมูลกฎหมายทั้งหมด ➔
+                            </button>
+                          )}
+                        </div>
                       </div>
                     )}
 

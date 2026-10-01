@@ -256,16 +256,26 @@ const s = {
   }
 };
 
-export default function LawView({ isAdmin, onNavigateToLawManagement }) {
+export default function LawView({ isAdmin, onNavigateToLawManagement, initialSearch = '' }) {
   const [laws, setLaws] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [appliedQuery, setAppliedQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearch || '');
+  const [appliedQuery, setAppliedQuery] = useState(initialSearch || '');
 
   useEffect(() => {
     fetchLaws();
   }, []);
+
+  useEffect(() => {
+    if (initialSearch !== undefined && initialSearch !== null) {
+      setSearchQuery(initialSearch || '');
+      setAppliedQuery(initialSearch || '');
+      if (initialSearch) {
+        setFilter('all');
+      }
+    }
+  }, [initialSearch]);
 
   async function fetchLaws() {
     setLoading(true);
@@ -467,8 +477,22 @@ export default function LawView({ isAdmin, onNavigateToLawManagement }) {
         ) : (
           filtered.map((l) => {
             const lawInfo = getLawBadgeInfo(l.cat);
+            const secClean = normalizeThaiDigits(String(l.section || '')).replace(/^(มาตรา|ม\.)\s*/i, '').trim();
+            const targetClean = normalizeThaiDigits(appliedQuery || '').replace(/^(มาตรา|ม\.)\s*/i, '').trim();
+            const isTargetHighlight = Boolean(targetClean && secClean === targetClean);
+
             return (
-              <div key={l.section || l.id} style={s.card}>
+              <div
+                key={l.section || l.id}
+                style={{
+                  ...s.card,
+                  ...(isTargetHighlight ? {
+                    border: '2px solid #7A1F2B',
+                    boxShadow: '0 8px 24px rgba(122,31,43,0.22)',
+                    background: '#FFFDF9'
+                  } : {})
+                }}
+              >
                 <div>
                   <div style={s.cardHead}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -483,6 +507,20 @@ export default function LawView({ isAdmin, onNavigateToLawManagement }) {
                       >
                         {lawInfo.label}
                       </span>
+                      {isTargetHighlight && (
+                        <span style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: '#7A1F2B',
+                          background: '#FDF1EC',
+                          border: '1px solid #E2A096',
+                          borderRadius: 4,
+                          padding: '2px 8px',
+                          fontFamily: "'Sarabun', sans-serif"
+                        }}>
+                          🎯 มาตราที่แนะนำจากแชท
+                        </span>
+                      )}
                     </div>
                   </div>
 

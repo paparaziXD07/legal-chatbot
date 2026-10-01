@@ -397,7 +397,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
   }
 
   async function handleClearAll() {
-    if (!window.confirm('⚠️ คำเตือน: คุณต้องการล้างประวัติการสนทนาทั้งหมดในระบบหรือไม่?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้')) return;
+    if (!window.confirm('คำเตือน: คุณต้องการล้างประวัติการสนทนาทั้งหมดในระบบหรือไม่?\n\nการดำเนินการนี้ไม่สามารถย้อนกลับได้')) return;
     setLoading(true);
     const success = await clearAllChatLogs();
     if (success) {
@@ -457,14 +457,14 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
     return (
       <div style={s.container}>
         <div style={s.lockCard}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🔐</div>
+          <div style={{ fontSize: 48, marginBottom: 12 }}></div>
           <h2 style={s.lockTitle}>เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น</h2>
           <p style={s.lockSubtitle}>
             หน้านี้ใช้สำหรับเรียกดู บันทึก และจัดการประวัติการสนทนาของระบบนิติบอททั้งหมด<br />
             กรุณาเข้าสู่ระบบด้วยบัญชีแอดมินเพื่อสิทธิ์การเข้าถึงข้อมูล
           </p>
           <button style={s.loginBtn} onClick={onOpenLoginModal}>
-            🔑 เข้าสู่ระบบ Admin
+            เข้าสู่ระบบ Admin
           </button>
         </div>
       </div>
@@ -477,7 +477,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
       <div style={s.headerPanel}>
         <div style={s.titleGroup}>
           <h2 style={s.h2}>
-            <span>📜</span> ประวัติการสนทนาของระบบ (Admin Chat History)
+            <span>ประวัติการสนทนาของระบบ (Admin Chat History)</span>
           </h2>
           <div style={s.subtitle}>
             บันทึกประวัติการสอบถามกฎหมายคอมพิวเตอร์ &amp; PDPA จากผู้ใช้งานผ่านระบบ AI
@@ -486,16 +486,16 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
 
         <div style={s.actionToolbar}>
           <button style={s.toolBtn('secondary')} onClick={loadLogs} title="โหลดข้อมูลล่าสุด">
-            🔄 โหลดใหม่
+            โหลดใหม่
           </button>
           <button style={s.toolBtn('secondary')} onClick={handleExportCSV} title="ส่งออกเป็นไฟล์ CSV">
-            📥 Export CSV
+            Export CSV
           </button>
           <button style={s.toolBtn('secondary')} onClick={handleExportJSON} title="ส่งออกเป็นไฟล์ JSON">
-            📄 Export JSON
+            Export JSON
           </button>
           <button style={s.toolBtn('danger')} onClick={handleClearAll} title="ล้างประวัติการสนทนาทั้งหมด">
-            🗑️ ล้างประวัติทั้งหมด
+            ล้างประวัติทั้งหมด
           </button>
         </div>
       </div>
@@ -532,7 +532,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
         <input
           style={s.searchInput}
           type="text"
-          placeholder="🔍 ค้นหาคำถาม, คำตอบ หรือชื่อมาตรา..."
+          placeholder="ค้นหาคำถาม, คำตอบ หรือชื่อมาตรา..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -542,10 +542,10 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
-          <option value="all">📚 หมวดหมู่กฎหมายทั้งหมด</option>
-          <option value="computer">💻 พ.ร.บ. คอมพิวเตอร์</option>
-          <option value="pdpa">🛡️ PDPA พ.ศ. 2562</option>
-          <option value="general">💬 ทั่วไป / ไม่ตรงมาตรา</option>
+          <option value="all">หมวดหมู่กฎหมายทั้งหมด</option>
+          <option value="computer">พ.ร.บ. คอมพิวเตอร์</option>
+          <option value="pdpa">PDPA พ.ศ. 2562</option>
+          <option value="general">ทั่วไป / ไม่ตรงมาตรา</option>
         </select>
 
         <select
@@ -553,7 +553,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
           value={selectedModel}
           onChange={(e) => setSelectedModel(e.target.value)}
         >
-          <option value="all">🤖 โมเดล AI ทั้งหมด</option>
+          <option value="all">โมเดล AI ทั้งหมด</option>
           <option value="R1">OpenThaiGPT R1 (32B Reasoning)</option>
           <option value="1.6">OpenThaiGPT 1.6 (72B)</option>
         </select>
@@ -563,8 +563,8 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
         >
-          <option value="newest">⏳ ล่าสุดขึ้นก่อน (Newest)</option>
-          <option value="oldest">⌛ เก่าสุดขึ้นก่อน (Oldest)</option>
+          <option value="newest">ล่าสุดขึ้นก่อน (Newest)</option>
+          <option value="oldest">เก่าสุดขึ้นก่อน (Oldest)</option>
         </select>
 
         {searchQuery && (
@@ -595,7 +595,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
               {loading ? (
                 <tr>
                   <td colSpan={6} style={{ ...s.td, textAlign: 'center', color: '#8a7a60', padding: 30 }}>
-                    ⏳ กำลังดึงข้อมูลประวัติการแชทจากระบบ...
+                    กำลังดึงข้อมูลประวัติการแชทจากระบบ...
                   </td>
                 </tr>
               ) : filteredLogs.length > 0 ? (
@@ -636,7 +636,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
                           }}
                           title="ดูรายละเอียดการสนทนาฉบับเต็ม"
                         >
-                          👁️ รายละเอียด
+                          รายละเอียด
                         </button>
                         <button
                           onClick={() => handleDeleteSingle(log.id)}
@@ -653,7 +653,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
                           }}
                           title="ลบประวัตินี้"
                         >
-                          {deletingId === log.id ? '...' : '🗑️'}
+                          {deletingId === log.id ? '...' : ''}
                         </button>
                       </div>
                     </td>
@@ -662,7 +662,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
               ) : (
                 <tr>
                   <td colSpan={6} style={{ ...s.td, textAlign: 'center', color: '#8a7a60', padding: 30 }}>
-                    🚫 ไม่พบข้อมูลประวัติการสนทนาตามเงื่อนไขที่ระบุ
+                    ไม่พบข้อมูลประวัติการสนทนาตามเงื่อนไขที่ระบุ
                   </td>
                 </tr>
               )}
@@ -677,7 +677,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
           <div style={s.modalContent} onClick={(e) => e.stopPropagation()}>
             <div style={s.modalHeader}>
               <div style={s.modalTitle}>
-                📋 รายละเอียดประวัติการแชท (Log ID #{selectedLog.id})
+                รายละเอียดประวัติการแชท (Log ID #{selectedLog.id})
               </div>
               <button style={s.closeBtn} onClick={() => setSelectedLog(null)}>
                 ✕
@@ -688,19 +688,19 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
               <span style={s.intentBadge}>Intent: {selectedLog.detectedIntent}</span>
               <span style={s.modelBadge}>Model: {selectedLog.modelUsed}</span>
               <span style={{ fontSize: 11, color: '#8a7a60', fontFamily: "'IBM Plex Mono', monospace" }}>
-                🕒 {selectedLog.timestamp}
+                เวลา {selectedLog.timestamp}
               </span>
             </div>
 
             {/* User Message */}
             <div style={s.sectionBox}>
-              <div style={s.sectionTitle}>💬 คำถามของผู้ใช้ (User Query)</div>
+              <div style={s.sectionTitle}>คำถามของผู้ใช้ (User Query)</div>
               <div style={s.sectionText}>{selectedLog.userMessage}</div>
             </div>
 
             {/* Bot Response */}
             <div style={s.sectionBox}>
-              <div style={s.sectionTitle}>🤖 คำตอบของระบบ AI นิติบอท</div>
+              <div style={s.sectionTitle}>คำตอบของระบบ AI นิติบอท</div>
               <div style={{ ...s.sectionText, color: '#591622', fontWeight: 500 }}>
                 {selectedLog.botResponse}
               </div>
@@ -708,7 +708,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
 
             {/* RAG Reasoning Steps */}
             <div style={s.sectionBox}>
-              <div style={s.sectionTitle}>🧠 ขั้นตอนการวิเคราะห์ตรรกะ AI (Reasoning Steps)</div>
+              <div style={s.sectionTitle}>ขั้นตอนการวิเคราะห์ตรรกะ AI (Reasoning Steps)</div>
               <div style={s.reasoningStep}>1. รับประโยคคำถามและสกัด Keywords สอดคล้องกับคลังข้อมูลกฎหมาย</div>
               <div style={s.reasoningStep}>
                 2. ค้นหา RAG Matching Vector &amp; Keyword Matcher: <strong>{selectedLog.detectedIntent}</strong>
@@ -723,7 +723,7 @@ export default function AdminChatHistoryView({ isAdmin, onOpenLoginModal }) {
                 onClick={() => handleDeleteSingle(selectedLog.id)}
                 style={s.toolBtn('danger')}
               >
-                🗑️ ลบประวัตินี้
+                ลบประวัตินี้
               </button>
               <button
                 onClick={() => setSelectedLog(null)}

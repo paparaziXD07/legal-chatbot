@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import LegalSeal from './LegalSeal';
 
 const TABS = [
-  { id: 'chat', label: '💬 สอบถามผ่านแชทบอท' },
-  { id: 'law',  label: '📜 ฐานข้อมูลกฎหมาย' },
-  { id: 'faq',  label: '❓ คำถามที่พบบ่อย (FAQ)' },
-  { id: 'dash', label: '📊 แดชบอร์ดผู้ดูแลระบบ' },
-  { id: 'admin-laws', label: '⚙️ จัดการกฎหมาย (Admin)' },
-  { id: 'history', label: '📜 ประวัติการแชท (Admin)' },
+  { id: 'chat', label: 'สอบถามผ่านแชทบอท' },
+  { id: 'law',  label: 'ฐานข้อมูลกฎหมาย' },
+  { id: 'faq',  label: 'คำถามที่พบบ่อย (FAQ)' },
+  { id: 'dash', label: 'แดชบอร์ดผู้ดูแลระบบ' },
+  { id: 'admin-laws', label: 'จัดการกฎหมาย (Admin)' },
+  { id: 'history', label: 'ประวัติการแชท (Admin)' },
 ];
 
 const styles = {
@@ -107,7 +107,7 @@ export default function Navbar({ activeTab, onTabChange, isAdmin, onOpenLoginMod
           <div>
             <div style={styles.eyebrow}>
               Knowledge-Based Legal Chatbot
-              <span style={styles.apiBadge}>⚡ Supabase + OpenThaiGPT</span>
+              <span style={styles.apiBadge}>Supabase + OpenThaiGPT</span>
             </div>
             <h1 style={styles.h1}>นิติบอท — พ.ร.บ.คอมพิวเตอร์ &amp; PDPA</h1>
           </div>
@@ -125,7 +125,7 @@ export default function Navbar({ activeTab, onTabChange, isAdmin, onOpenLoginMod
                 background: '#7A1F2B', color: '#fff', fontSize: 12, padding: '4px 10px',
                 borderRadius: 20, fontWeight: 600, fontFamily: "'Sarabun', sans-serif"
               }}>
-                👤 ผู้ดูแลระบบ (Admin)
+                ผู้ดูแลระบบ (Admin)
               </span>
               <button
                 onClick={onLogout}
@@ -135,7 +135,7 @@ export default function Navbar({ activeTab, onTabChange, isAdmin, onOpenLoginMod
                   fontFamily: "'Sarabun', sans-serif", fontWeight: 600
                 }}
               >
-                🚪 ออกจากระบบ
+                ออกจากระบบ
               </button>
             </div>
           ) : (
@@ -148,7 +148,7 @@ export default function Navbar({ activeTab, onTabChange, isAdmin, onOpenLoginMod
                 display: 'flex', alignItems: 'center', gap: 5, boxShadow: '0 2px 6px rgba(46,85,68,0.2)'
               }}
             >
-              🔐 เข้าสู่ระบบ Admin
+              เข้าสู่ระบบ Admin
             </button>
           )}
         </div>
@@ -207,7 +207,7 @@ export default function Navbar({ activeTab, onTabChange, isAdmin, onOpenLoginMod
                     background: '#7A1F2B', color: '#fff', fontSize: 11, padding: '3px 8px',
                     borderRadius: 12, fontWeight: 600, fontFamily: "'Sarabun', sans-serif"
                   }}>
-                    👤 Admin
+                    Admin
                   </span>
                   <button
                     onClick={onLogout}
@@ -218,7 +218,7 @@ export default function Navbar({ activeTab, onTabChange, isAdmin, onOpenLoginMod
                     }}
                     title="ออกจากระบบแอดมิน"
                   >
-                    🚪 ออก
+                    ออก
                   </button>
                 </div>
               ) : (
@@ -232,7 +232,7 @@ export default function Navbar({ activeTab, onTabChange, isAdmin, onOpenLoginMod
                   }}
                   title="เข้าสู่ระบบผู้ดูแลระบบ"
                 >
-                  🔐 Admin
+                  Admin
                 </button>
               )}
             </div>

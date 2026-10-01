@@ -174,10 +174,10 @@ export default function LawView({ isAdmin, onNavigateToLawManagement }) {
       {isAdmin && onNavigateToLawManagement && (
         <div style={s.adminNotice}>
           <div style={{ fontSize: 13, color: '#591622', fontWeight: 600 }}>
-            👤 ท่านอยู่ในสิทธิ์ผู้ดูแลระบบ (Admin) — หากต้องการเพิ่ม แก้ไข หรือลบมาตรากฎหมาย สามารถจัดการได้ที่หน้าจัดการกฎหมาย
+            ท่านอยู่ในสิทธิ์ผู้ดูแลระบบ (Admin) — หากต้องการเพิ่ม แก้ไข หรือลบมาตรากฎหมาย สามารถจัดการได้ที่หน้าจัดการกฎหมาย
           </div>
           <button style={s.manageBtn} onClick={onNavigateToLawManagement}>
-            ⚙️ ไปยังหน้าจัดการกฎหมาย (Admin Law Management)
+            ไปยังหน้าจัดการกฎหมาย (Admin Law Management)
           </button>
         </div>
       )}
@@ -191,7 +191,7 @@ export default function LawView({ isAdmin, onNavigateToLawManagement }) {
           ))}
           <input
             style={s.searchInput}
-            placeholder="🔍 ค้นตามเลขมาตรา หรือคำสำคัญ..."
+            placeholder="ค้นตามเลขมาตรา หรือคำสำคัญ..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
@@ -200,10 +200,10 @@ export default function LawView({ isAdmin, onNavigateToLawManagement }) {
 
       <div style={s.grid}>
         {loading ? (
-          <div style={s.emptyBox}>⚡ กำลังโหลดข้อมูลกฎหมายจาก Supabase...</div>
+          <div style={s.emptyBox}>กำลังโหลดข้อมูลกฎหมายจาก Supabase...</div>
         ) : filtered.length === 0 ? (
           <div style={s.emptyBox}>
-            ℹ️ ไม่พบข้อมูลกฎหมายตามเงื่อนไขการค้นหา
+            ไม่พบข้อมูลกฎหมายตามเงื่อนไขการค้นหา
           </div>
         ) : (
           filtered.map((l) => {

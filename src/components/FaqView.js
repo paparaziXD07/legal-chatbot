@@ -173,20 +173,20 @@ export default function FaqView({ isAdmin }) {
       <div style={s.headerRow}>
         <input
           style={s.searchInput}
-          placeholder="🔍 ค้นหาคำถาม หรือ คำตอบ..."
+          placeholder="ค้นหาคำถาม หรือ คำตอบ..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
         />
         {isAdmin && (
           <button style={s.addBtn} onClick={() => setShowAddForm(!showAddForm)}>
-            <span>{showAddForm ? '✕ ยกเลิก' : '➕ เพิ่มคำถาม FAQ (Admin)'}</span>
+            <span>{showAddForm ? '✕ ยกเลิก' : 'เพิ่มคำถาม FAQ (Admin)'}</span>
           </button>
         )}
       </div>
 
       {isAdmin && showAddForm && (
         <form onSubmit={handleAddFaq} style={s.newFaqForm}>
-          <strong>➕ เพิ่มคำถาม FAQ ใหม่</strong>
+          <strong>เพิ่มคำถาม FAQ ใหม่</strong>
           <input
             style={s.input}
             placeholder="คำถาม เช่น โพสต์ทวงหนี้ผ่านเฟซบุ๊กทำได้ไหม..."
@@ -210,10 +210,10 @@ export default function FaqView({ isAdmin }) {
       )}
 
       {loading ? (
-        <div style={s.emptyBox}>⚡ กำลังโหลดคำถาม FAQ จาก Supabase...</div>
+        <div style={s.emptyBox}>กำลังโหลดคำถาม FAQ จาก Supabase...</div>
       ) : filtered.length === 0 ? (
         <div style={s.emptyBox}>
-          ℹ️ ไม่พบข้อมูล FAQ ใน Supabase (หรือยังไม่มีรายการตามคำค้นหา)<br />
+          ไม่พบข้อมูล FAQ ใน Supabase (หรือยังไม่มีรายการตามคำค้นหา)<br />
           {isAdmin && <small>สามารถกดปุ่ม "เพิ่มคำถาม FAQ (Admin)" เพื่อเพิ่มรายการใหม่ได้</small>}
         </div>
       ) : (
@@ -230,7 +230,7 @@ export default function FaqView({ isAdmin }) {
                       onClick={(e) => handleDeleteFaq(i, e)}
                       title="ลบคำถาม"
                     >
-                      🗑️ ลบ
+                      ลบ
                     </button>
                   )}
                   <span style={s.plus(open)}>+</span>

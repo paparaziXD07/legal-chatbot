@@ -173,7 +173,7 @@ export default function DashboardView({ isAdmin, onNavigateToHistory, onOpenLogi
       setChatLogs(Array.isArray(fetchedLogs) ? fetchedLogs : []);
       setLastUpdated(new Date().toLocaleTimeString('th-TH'));
     } catch (err) {
-      console.warn('⚠️ Error loading real dashboard data:', err);
+      console.warn('Error loading real dashboard data:', err);
     } finally {
       setLoading(false);
     }
@@ -239,7 +239,7 @@ export default function DashboardView({ isAdmin, onNavigateToHistory, onOpenLogi
       {/* ── Dashboard Header ── */}
       <div style={s.headerBar}>
         <div>
-          <h2 style={s.headerTitle}>📊 แดชบอร์ดสรุปผลและสถิติระบบ (Admin Dashboard)</h2>
+          <h2 style={s.headerTitle}>แดชบอร์ดสรุปผลและสถิติระบบ (Admin Dashboard)</h2>
           <div style={s.headerSub}>
             ดึงข้อมูลจริงจาก Supabase Database &amp; RAG Vector Storage แบบ Real-time
             {lastUpdated && <span style={{ marginLeft: 8, color: '#8a7a60' }}>(อัปเดตล่าสุด {lastUpdated})</span>}
@@ -264,7 +264,7 @@ export default function DashboardView({ isAdmin, onNavigateToHistory, onOpenLogi
                 gap: 6
               }}
             >
-              📜 ดูประวัติการสนทนาทั้งหมด
+              ดูประวัติการสนทนาทั้งหมด
             </button>
           )}
           <button
@@ -276,7 +276,7 @@ export default function DashboardView({ isAdmin, onNavigateToHistory, onOpenLogi
               cursor: loading ? 'not-allowed' : 'pointer'
             }}
           >
-            {loading ? '⏳ กำลังโหลด...' : '🔄 รีเฟรชข้อมูล'}
+            {loading ? 'กำลังโหลด...' : 'รีเฟรชข้อมูล'}
           </button>
         </div>
       </div>
@@ -297,7 +297,7 @@ export default function DashboardView({ isAdmin, onNavigateToHistory, onOpenLogi
         {/* ── Panel 1: Top Intents Bar Chart (Real Data) ── */}
         <div style={s.panel}>
           <h3 style={s.panelTitle}>
-            <span>📊 สถิติหัวข้อกฎหมายที่ถูกสอบถามจริง (Intent Classification)</span>
+            <span>สถิติหัวข้อกฎหมายที่ถูกสอบถามจริง (Intent Classification)</span>
           </h3>
 
           {isAdmin ? (
@@ -327,7 +327,7 @@ export default function DashboardView({ isAdmin, onNavigateToHistory, onOpenLogi
             )
           ) : (
             <div style={{ textAlign: 'center', padding: '36px 16px', color: '#8a7a60' }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>🔐</div>
+              <div style={{ fontSize: 32, marginBottom: 8 }}></div>
               <div style={{ fontWeight: 600, color: '#591622', marginBottom: 4 }}>จำกัดสิทธิ์เฉพาะผู้ดูแลระบบ (Admin)</div>
               <div style={{ fontSize: 12, marginBottom: 12 }}>กรุณาเข้าสู่ระบบเพื่อดูสถิติ Intent จากประวัติการสนทนาจริง</div>
               {onOpenLoginModal && (
@@ -345,7 +345,7 @@ export default function DashboardView({ isAdmin, onNavigateToHistory, onOpenLogi
                     fontFamily: "'Sarabun', sans-serif"
                   }}
                 >
-                  🔑 เข้าสู่ระบบ Admin
+                  เข้าสู่ระบบ Admin
                 </button>
               )}
             </div>
@@ -355,7 +355,7 @@ export default function DashboardView({ isAdmin, onNavigateToHistory, onOpenLogi
         {/* ── Panel 2: Knowledge Base & RAG Engine Overview ── */}
         <div style={s.panel}>
           <h3 style={s.panelTitle}>
-            <span>📚 สัดส่วนฐานข้อมูลกฎหมาย &amp; สถานะระบบ RAG</span>
+            <span>สัดส่วนฐานข้อมูลกฎหมาย &amp; สถานะระบบ RAG</span>
           </h3>
 
           <div style={{ fontSize: 13, lineHeight: 1.8, color: '#3d3326' }}>
@@ -402,11 +402,11 @@ export default function DashboardView({ isAdmin, onNavigateToHistory, onOpenLogi
             <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid #E6DAC8', display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontWeight: 600, color: '#591622' }}>• ฐานข้อมูล PostgreSQL:</span>
-                <span style={s.statusTag}>🟢 Supabase Connected</span>
+                <span style={s.statusTag}>Supabase Connected</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontWeight: 600, color: '#591622' }}>• RAG Semantic Search:</span>
-                <span style={s.statusTag}>🟢 Active (pgvector 768D)</span>
+                <span style={s.statusTag}>Active (pgvector 768D)</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontWeight: 600, color: '#591622' }}>• โครงสร้างระบบ:</span>

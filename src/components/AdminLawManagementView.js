@@ -483,14 +483,14 @@ export default function AdminLawManagementView({ isAdmin, onOpenLoginModal }) {
     return (
       <div style={s.container}>
         <div style={s.lockCard}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🔐</div>
+          <div style={{ fontSize: 48, marginBottom: 12 }}></div>
           <h2 style={s.lockTitle}>เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น</h2>
           <p style={s.lockSubtitle}>
             หน้านี้ใช้สำหรับเพิ่ม แก้ไข และจัดการฐานข้อมูลกฎหมายคอมพิวเตอร์ &amp; PDPA ของระบบนิติบอท<br />
             กรุณาเข้าสู่ระบบด้วยบัญชีแอดมินเพื่อสิทธิ์การเข้าถึงข้อมูล
           </p>
           <button style={s.loginBtn} onClick={onOpenLoginModal}>
-            🔑 เข้าสู่ระบบ Admin
+            เข้าสู่ระบบ Admin
           </button>
         </div>
       </div>
@@ -503,7 +503,7 @@ export default function AdminLawManagementView({ isAdmin, onOpenLoginModal }) {
       <div style={s.headerPanel}>
         <div style={s.titleGroup}>
           <h2 style={s.h2}>
-            <span>⚙️</span> จัดการฐานข้อมูลกฎหมาย (Admin Law Management)
+            <span>จัดการฐานข้อมูลกฎหมาย (Admin Law Management)</span>
           </h2>
           <div style={s.subtitle}>
             เพิ่ม แก้ไข และอัปเดตบทบัญญัติ สาระสำคัญ บทลงโทษ และ Keywords สำหรับ RAG Search
@@ -512,7 +512,7 @@ export default function AdminLawManagementView({ isAdmin, onOpenLoginModal }) {
 
         <div style={s.actionToolbar}>
           <button style={s.secondaryBtn} onClick={loadLaws} title="รีเฟรชข้อมูลล่าสุดจาก Supabase">
-            🔄 โหลดใหม่
+            โหลดใหม่
           </button>
           <button
             style={s.primaryBtn}
@@ -521,7 +521,7 @@ export default function AdminLawManagementView({ isAdmin, onOpenLoginModal }) {
               setIsModalOpen(true);
             }}
           >
-            ➕ เพิ่มมาตราใหม่
+            เพิ่มมาตราใหม่
           </button>
         </div>
       </div>
@@ -558,7 +558,7 @@ export default function AdminLawManagementView({ isAdmin, onOpenLoginModal }) {
         <input
           style={s.searchInput}
           type="text"
-          placeholder="🔍 ค้นหาด้วยเลขมาตรา, คำอธิบาย หรือ Keywords..."
+          placeholder="ค้นหาด้วยเลขมาตรา, คำอธิบาย หรือ Keywords..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -568,9 +568,9 @@ export default function AdminLawManagementView({ isAdmin, onOpenLoginModal }) {
           value={selectedCat}
           onChange={(e) => setSelectedCat(e.target.value)}
         >
-          <option value="all">📚 หมวดหมู่กฎหมายทั้งหมด</option>
-          <option value="computer">💻 พ.ร.บ. คอมพิวเตอร์</option>
-          <option value="pdpa">🛡️ PDPA พ.ศ. 2562</option>
+          <option value="all">หมวดหมู่กฎหมายทั้งหมด</option>
+          <option value="computer">พ.ร.บ. คอมพิวเตอร์</option>
+          <option value="pdpa">PDPA พ.ศ. 2562</option>
         </select>
 
         <span style={{ marginLeft: 'auto', fontSize: 12.5, color: '#8a7a60', fontFamily: "'IBM Plex Mono', monospace" }}>
@@ -584,7 +584,7 @@ export default function AdminLawManagementView({ isAdmin, onOpenLoginModal }) {
           <div style={s.emptyBox}>⚡ กำลังดึงข้อมูลมาตรากฎหมายจาก Supabase...</div>
         ) : filteredLaws.length === 0 ? (
           <div style={s.emptyBox}>
-            ℹ️ ไม่พบมาตรากฎหมายตรงตามเงื่อนไขที่ระบุ<br />
+            ไม่พบมาตรากฎหมายตรงตามเงื่อนไขที่ระบุ<br />
             <button
               style={{ ...s.primaryBtn, marginTop: 12 }}
               onClick={() => {
@@ -592,7 +592,7 @@ export default function AdminLawManagementView({ isAdmin, onOpenLoginModal }) {
                 setIsModalOpen(true);
               }}
             >
-              ➕ เพิ่มมาตรากฎหมายใหม่
+              เพิ่มมาตรากฎหมายใหม่
             </button>
           </div>
         ) : (
@@ -622,14 +622,14 @@ export default function AdminLawManagementView({ isAdmin, onOpenLoginModal }) {
                         setIsModalOpen(true);
                       }}
                     >
-                      ✏️ แก้ไข
+                      แก้ไข
                     </button>
                     <button
                       style={s.deleteBtn}
                       title="ลบมาตรา"
                       onClick={() => handleDeleteLaw(l.section)}
                     >
-                      🗑️ ลบ
+                      ลบ
                     </button>
                   </div>
                 </div>

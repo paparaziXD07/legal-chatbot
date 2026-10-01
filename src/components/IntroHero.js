@@ -173,13 +173,13 @@ export default function IntroHero({ onNavigate }) {
 
       <div style={s.badgeRow}>
         <span style={s.pill('#F4E7CE', '#7A1F2B')}>
-          ⚖️ Knowledge-Based Legal AI System
+          Knowledge-Based Legal AI System
         </span>
         <span style={s.pill('#2E5544', '#fff')}>
           ⚡ OpenThaiGPT RAG Engine
         </span>
         <span style={s.pill('#EBF4EF', '#2E5544')}>
-          🎓 มหาวิทยาลัยราชภัฏนครศรีธรรมราช
+          มหาวิทยาลัยราชภัฏนครศรีธรรมราช
         </span>
       </div>
 
@@ -197,7 +197,7 @@ export default function IntroHero({ onNavigate }) {
 
       <div style={s.statsGrid}>
         <div style={s.statCard}>
-          <div style={s.statIcon}>📖</div>
+          <div style={s.statIcon}></div>
           <div>
             <div style={s.statTitle}>2 พ.ร.บ. หลัก</div>
             <p style={s.statSub}>พ.ร.บ.คอมพิวเตอร์ &amp; PDPA</p>
@@ -205,7 +205,7 @@ export default function IntroHero({ onNavigate }) {
         </div>
 
         <div style={s.statCard}>
-          <div style={s.statIcon}>🎯</div>
+          <div style={s.statIcon}></div>
           <div>
             <div style={s.statTitle}>96.4% Accuracy</div>
             <p style={s.statSub}>ความแม่นยำดึงข้อมูลมาตรา</p>
@@ -213,7 +213,7 @@ export default function IntroHero({ onNavigate }) {
         </div>
 
         <div style={s.statCard}>
-          <div style={s.statIcon}>🧠</div>
+          <div style={s.statIcon}></div>
           <div>
             <div style={s.statTitle}>OpenThaiGPT</div>
             <p style={s.statSub}>LLM ภาษาไทยเชี่ยวชาญกฎหมาย</p>
@@ -221,7 +221,7 @@ export default function IntroHero({ onNavigate }) {
         </div>
 
         <div style={s.statCard}>
-          <div style={s.statIcon}>⚡</div>
+          <div style={s.statIcon}></div>
           <div>
             <div style={s.statTitle}>Real-time AI</div>
             <p style={s.statSub}>ถาม-ตอบและเปิดอ่านได้ 24 ชม.</p>
@@ -234,48 +234,48 @@ export default function IntroHero({ onNavigate }) {
           style={s.primaryBtn}
           onClick={() => onNavigate('law')}
         >
-          <span>📜 เปิดอ่าน UI เล่มกฎหมาย</span>
+          <span>เปิดอ่าน UI เล่มกฎหมาย</span>
         </button>
 
         <button
           style={s.secondaryBtn}
           onClick={() => onNavigate('chat')}
         >
-          <span>💬 สอบถามนิติบอททันที</span>
+          <span>สอบถามนิติบอททันที</span>
         </button>
 
         <button
           style={{ ...s.secondaryBtn, background: '#F5EFE1', border: '1px solid #E4D2A4' }}
           onClick={() => onNavigate('dash')}
         >
-          <span>📊 ดูแดชบอร์ดประมวลผล</span>
+          <span>ดูแดชบอร์ดประมวลผล</span>
         </button>
       </div>
 
       <div style={s.featureGrid}>
         <div style={s.featureCard}>
-          <div style={s.featureHead}>📜 UI เล่มกฎหมายดิจิทัล</div>
+          <div style={s.featureHead}>UI เล่มกฎหมายดิจิทัล</div>
           <p style={s.featureText}>
             นำเสนอในรูปแบบเล่มกฎหมาย 3D จำลอง เลือกเปิดอ่านหัวข้อมาตรา ขยายดูบทบัญญัติเต็ม สรุปเข้าใจง่าย และบทลงโทษ
           </p>
         </div>
 
         <div style={s.featureCard}>
-          <div style={s.featureHead}>💬 แชทบอทสอบถามข้อกฎหมาย</div>
+          <div style={s.featureHead}>แชทบอทสอบถามข้อกฎหมาย</div>
           <p style={s.featureText}>
             ถามปัญหา เช่น การโดนแฮก ข่าวปลอม โพสต์ประจาน ทวงหนี้ หรือ PDPA พร้อมแสดงการคิด Chain-of-Thought (CoT)
           </p>
         </div>
 
         <div style={s.featureCard}>
-          <div style={s.featureHead}>❓ คลังคำถามที่พบบ่อย</div>
+          <div style={s.featureHead}>คลังคำถามที่พบบ่อย</div>
           <p style={s.featureText}>
             รวบรวมคำถามยอดฮิตทางกฎหมายดิจิทัล พร้อมคำอธิบายและแนวปฏิบัติทางกฎหมายที่ถูกต้อง
           </p>
         </div>
 
         <div style={s.featureCard}>
-          <div style={s.featureHead}>📊 แดชบอร์ด &amp; สถาปัตยกรรม</div>
+          <div style={s.featureHead}>แดชบอร์ด &amp; สถาปัตยกรรม</div>
           <p style={s.featureText}>
             ติดตามสถิติการใช้งาน Intent ที่ถูกถามบ่อย พร้อมโครงสร้างระบบ 3-Tier Architecture ที่มีความปลอดภัยสูง
           </p>

@@ -154,35 +154,52 @@ function runRAGSearch(query) {
 //  OpenAI GPT API Integration & Smart Conversational Engine
 // ============================================================
 
-async function callGPTAPI({ prompt, contextLaw, matchedLaws = [], model }) {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey || apiKey.trim() === '' || apiKey.includes('YOUR_OPENAI_KEY')) {
-    return null; // No API Key set -> fallback to smart local conversational engine
+// ============================================================
+//  OpenAI GPT API Integration & Smart Conversational Engine
+// ============================================================
+
+function buildSystemPrompt({ matchedLaws = [], contextLaw, style = 'adaptive' }) {
+  let styleInstruction = '';
+  if (style === 'concise') {
+    styleInstruction = `
+[สไตล์คำตอบ: สรุปสั้น กระชับ ตรงประเด็น (Concise Mode)]
+- สรุปใจความสำคัญแบบทันใจ: ระบุว่าผิดหรือไม่ผิด มาตราใด โทษเท่าไร และสิ่งที่ต้องทำทันที
+- ใช้ Bullet points สั้นๆ ชัดเจน อ่านจบได้ใน 20-30 วินาที หลีกเลี่ยงบทนำและถ้อยคำเยิ่นเย้อ`;
+  } else if (style === 'deep') {
+    styleInstruction = `
+[สไตล์คำตอบ: วิเคราะห์เจาะลึกเชิงนิติศาสตร์ (Deep Legal Analysis)]
+- วิเคราะห์อย่างละเอียดรอบด้าน: แยกแยะองค์ประกอบความผิด (การกระทำ, เจตนา, ความเสียหาย)
+- ชี้ประเด็นข้อยกเว้นความผิดหรือเหตุบรรเทาโทษ
+- เปรียบเทียบมุมมองระหว่างคดีอาญากับคดีแพ่ง (ค่าสินไหมทดแทน)
+- แนะนำแนวทางการรวบรวมพยานหลักฐานดิจิทัลให้มีน้ำหนักในชั้นศาล`;
+  } else if (style === 'friendly') {
+    styleInstruction = `
+[สไตล์คำตอบ: เป็นมิตร อบอุ่น ภาษาชาวบ้านเข้าใจง่าย (Empathetic & Friendly)]
+- ใช้ภาษาพูดที่อบอุ่น เป็นกันเอง สุภาพ ให้กำลังใจผู้ใช้เหมือนพี่น้องที่คอยช่วยเหลือ
+- หลีกเลี่ยงศัพท์กฎหมายที่ซับซ้อน หรือถ้ามีให้เปรียบเทียบกับชีวิตประจำวันให้เข้าใจง่าย
+- เน้นการปลอบประโลม ลดความกังวล และแนะวิธีแก้ปัญหาเป็นขั้นตอนง่ายๆ ทีละขั้น`;
+  } else {
+    // Default: 'adaptive' / 'versatile'
+    styleInstruction = `
+[สไตล์คำตอบ: หลากหลาย เป็นธรรมชาติ ปรับตามบริบทของผู้ใช้ (Adaptive & Natural)]
+- วิเคราะห์ตามสถานการณ์จริง: หากผู้ใช้เล่าเหตุการณ์มายาว ให้สรุปประเด็นหลัก ชี้แจงทีละการกระทำว่าเข้าข่ายกฎหมายใด
+- ตอบอย่างมีมิติ: ยกตัวอย่างเคสเทียบเคียง ชี้ทั้งข้อเสี่ยง ข้อยกเว้น และมุมมองทางออกที่หลากหลาย
+- หากเป็นคำถามสั้นหรือคำถามเจาะจง ให้ตอบตรงประเด็น รวดเร็ว ไม่อ้อมค้อม`;
   }
 
-  const gptModel = process.env.GPT_MODEL || (model && model.startsWith('gpt') ? model : 'gpt-4o-mini');
-  const baseUrl = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
+  let prompt = `คุณคือ "นิติบอท (Legal Bot)" ผู้ช่วยและที่ปรึกษา AI ด้านกฎหมายดิจิทัลไทย (พ.ร.บ.ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ และ พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล PDPA)
 
-  let systemPrompt = `คุณคือ "นิติบอท (Legal Bot)" ผู้ช่วยและที่ปรึกษา AI ด้านกฎหมายดิจิทัลไทย (พ.ร.บ.คอมพิวเตอร์ และ PDPA)
-บทบาทและลักษณะการสื่อสาร:
-1. เป็นมิตร อบอุ่น สุภาพ และมีความเป็นมนุษย์ (Empathetic & Natural Conversation) เสมือนนักกฎหมายใจดีที่พร้อมช่วยเหลือประชาชน
-2. รับฟังและเข้าใจความรู้สึกของผู้ใช้อย่างแท้จริง โดยเฉพาะเมื่อผู้ใช้กำลังกังวล เดือดร้อน หรือประสบปัญหาจากการถูกหลอกลวง ละเมิด หรือคุกคาม
-3. อธิบายข้อกฎหมายที่ซับซ้อนให้กลายเป็นภาษาพูดที่คนทั่วไปเข้าใจง่าย หลีกเลี่ยงภาษาทางการที่แข็งทื่อหรืออ่านยาก
-
-แนวทางการวิเคราะห์คำถามยาวๆ และเรื่องเล่า (Scenario & Narrative Analysis):
-- ผู้ใช้อาจพิมพ์เล่าเหตุการณ์มายาว มีหลายเรื่องหรือตัวละครซ้อนกัน ให้จับใจความสำคัญของเรื่องเล่าและสรุปประเด็นหลักให้ผู้ใช้เห็นว่าคุณเข้าใจสิ่งที่เขาเผชิญอยู่
-- หากในเรื่องมีหลายการกระทำความผิด ให้แยกแยะทีละประเด็นและจับคู่กับมาตรากฎหมายที่เกี่ยวข้องให้ครบถ้วน
-
-โครงสร้างการตอบที่แนะนำ (ให้ตอบอย่างลื่นไหลและเป็นธรรมชาติ):
-1. ทักทายและรับฟังด้วยความเห็นอกเห็นใจ: เริ่มต้นด้วยคำทักทายที่อบอุ่นและแสดงความเข้าใจต่อสถานการณ์ที่เกิดขึ้น
-2. วิเคราะห์ข้อเท็จจริงตามกฎหมาย: อธิบายว่าจากเหตุการณ์ที่เล่ามา การกระทำใดเข้าข่ายผิดกฎหมายใด มาตราใด เพราะเหตุใด (อ้างอิง พ.ร.บ.คอมพิวเตอร์ หรือ PDPA)
-3. บทกำหนดโทษและความรับผิด: ระบุบทลงโทษอย่างชัดเจน (โทษจำคุก, โทษปรับ, หรือค่าเสียหายทางแพ่ง)
-4. คำแนะนำขั้นตอนที่ควรทำทันที (Action Plan): ให้แนวทางปฏิบัติที่เป็นรูปธรรม เช่น การรวบรวมหลักฐาน (แคปหน้าจอแชท สลิป บัญชี URL), การติดต่อธนาคาร/สายด่วน AOC 1441, การแจ้งความออนไลน์ที่ www.thaipoliceonline.go.th
-5. ลงท้ายอย่างพร้อมช่วยเหลือ: ให้กำลังใจและแจ้งว่าหากมีคำถามเพิ่มเติมสามารถพิมพ์ถามได้เสมอ
-
-ข้อกำหนดความถูกต้อง:
-- อ้างอิงข้อมูลจากคลังความรู้กฎหมายที่ให้ไว้อย่างถูกต้อง ห้ามแต่งข้อกฎหมายขึ้นเอง
-- หากคำถามไม่เกี่ยวกับกฎหมายดิจิทัล ให้ชี้แจงอย่างสุภาพและแนะนำหน่วยงานที่เกี่ยวข้อง`;
+หลักการสื่อสารสำคัญเพื่อความเป็นธรรมชาติและหลากหลาย:
+1. การใช้ภาษาที่หลากหลายและเป็นมนุษย์ (Linguistic Variety):
+   - หลีกเลี่ยงการขึ้นต้นและลงท้ายด้วยประโยคเดิมซ้ำๆ ทุกครั้ง ไม่ต้องมีแม่แบบตายตัว
+   - ปรับน้ำเสียงและโครงสร้างคำตอบให้เหมาะสมกับคำถามของผู้ใช้
+   - ในการให้คำแนะนำทางออก ให้เสนอทางเลือกที่รอบด้าน เช่น (1) การเจรจาไกล่เกลี่ย/ระงับเหตุเบื้องต้น, (2) การบันทึกหลักฐานดิจิทัล, (3) การใช้สิทธิทางกฎหมายหรือแจ้งหน่วยงาน (สายด่วน AOC 1441, www.thaipoliceonline.go.th, ศูนย์ PDPC)
+2. รองรับการสนทนาต่อเนื่อง (Multi-turn Context):
+   - หากผู้ใช้ถามคำถามต่อเนื่อง (Follow-up) หรือถามเจาะจงจากเรื่องเดิม ให้ตอบเชื่อมโยงทันทีโดยไม่ต้องเริ่มต้นทักทายใหม่หรือแนะนำตัวซ้ำซ้อน
+3. ความถูกต้องแม่นยำ:
+   - อ้างอิงตัวบทและมาตราตามคลังความรู้กฎหมายที่ได้รับอย่างแม่นยำ ห้ามแต่งข้อกฎหมายขึ้นเอง
+   - หากคำถามไม่เกี่ยวกับกฎหมายดิจิทัล ให้ชี้แจงอย่างสุภาพและแนะนำช่องทางที่ถูกต้อง
+${styleInstruction}`;
 
   const lawsToInclude = matchedLaws && matchedLaws.length > 0 
     ? matchedLaws 
@@ -199,10 +216,48 @@ async function callGPTAPI({ prompt, contextLaw, matchedLaws = [], model }) {
 - บทกำหนดโทษ: ${penaltyText}`;
     }).join('\n\n');
 
-    systemPrompt += `\n\n[ข้อมูลคลังความรู้กฎหมายอ้างอิงจากฐานข้อมูล (RAG Context)]\n${contextStr}\n\nคำสั่ง: ให้นำข้อมูลมาตรากฎหมายข้างต้นมาประยุกต์และตอบคำถามของผู้ใช้อย่างครบถ้วน เป็นธรรมชาติ และตรงกับเรื่องราวที่ผู้ใช้เล่า`;
+    prompt += `\n\n[ข้อมูลคลังความรู้กฎหมายอ้างอิงจากฐานข้อมูล (RAG Context)]\n${contextStr}\n\nคำสั่ง: นำข้อมูลมาตรากฎหมายข้างต้นมาประยุกต์ตอบคำถามของผู้ใช้อย่างครบถ้วน ถูกต้อง เป็นธรรมชาติ และสอดคล้องกับเรื่องราวที่ผู้ใช้สอบถาม`;
   } else {
-    systemPrompt += `\n\n[หมายเหตุ] ไม่พบมาตราที่ตรงเป้าหมายโดยตรงในระบบ กรุณาตอบอย่างสุภาพ อธิบายหลักการเบื้องต้น และให้คำแนะนำช่องทางการติดต่อช่วยเหลือ เช่น สายด่วน AOC 1441 หรือศูนย์ดำรงธรรม`;
+    prompt += `\n\n[หมายเหตุ] ไม่พบมาตราที่ตรงเป้าหมายโดยตรงในฐานข้อมูล กรุณาตอบโดยใช้หลักการกฎหมายทั่วไปอย่างสมเหตุสมผล ชี้แนะแนวทางเบื้องต้น และแนะนำช่องทางติดต่อช่วยเหลือ`;
   }
+
+  return prompt;
+}
+
+function getStyleTemperature(style) {
+  switch (style) {
+    case 'concise': return 0.65;
+    case 'deep': return 0.72;
+    case 'friendly': return 0.85;
+    case 'adaptive':
+    default: return 0.8;
+  }
+}
+
+async function callGPTAPI({ prompt, contextLaw, matchedLaws = [], model, history = [], style = 'adaptive' }) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || apiKey.trim() === '' || apiKey.includes('YOUR_OPENAI_KEY')) {
+    return null;
+  }
+
+  const gptModel = process.env.GPT_MODEL || (model && model.startsWith('gpt') ? model : 'gpt-4o-mini');
+  const baseUrl = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
+  const systemPrompt = buildSystemPrompt({ matchedLaws, contextLaw, style });
+  const temp = getStyleTemperature(style);
+
+  // Construct message thread with conversation history
+  const messages = [{ role: 'system', content: systemPrompt }];
+  if (Array.isArray(history) && history.length > 0) {
+    history.slice(-8).forEach(item => {
+      if (item && item.content) {
+        messages.push({
+          role: item.role === 'user' ? 'user' : 'assistant',
+          content: item.content
+        });
+      }
+    });
+  }
+  messages.push({ role: 'user', content: prompt });
 
   try {
     const controller = new AbortController();
@@ -216,11 +271,9 @@ async function callGPTAPI({ prompt, contextLaw, matchedLaws = [], model }) {
       },
       body: JSON.stringify({
         model: gptModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.6,
+        messages,
+        temperature: temp,
+        top_p: 0.95,
         max_tokens: 1800
       }),
       signal: controller.signal
@@ -255,103 +308,103 @@ async function callGPTAPI({ prompt, contextLaw, matchedLaws = [], model }) {
 //  Google Gemini API Integration (Native High-Availability Engine)
 // ============================================================
 
-async function callGeminiAPI({ prompt, contextLaw, matchedLaws = [], model }) {
+async function callGeminiAPI({ prompt, contextLaw, matchedLaws = [], model, history = [], style = 'adaptive' }) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey.trim() === '') return null;
 
-  const geminiModel = process.env.GEMINI_CHAT_MODEL || model || 'gemini-3.1-flash-lite';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey.trim()}`;
+  const candidateModels = [
+    process.env.GEMINI_CHAT_MODEL || 'gemini-3.1-flash-lite',
+    'gemini-3.5-flash',
+    'gemini-flash-latest'
+  ].filter(Boolean);
 
-  let systemPrompt = `คุณคือ "นิติบอท (Legal Bot)" ผู้ช่วยและที่ปรึกษา AI ด้านกฎหมายดิจิทัลไทย (พ.ร.บ.คอมพิวเตอร์ และ PDPA)
-บทบาทและลักษณะการสื่อสาร:
-1. เป็นมิตร อบอุ่น สุภาพ และมีความเป็นมนุษย์สูง (Empathetic & Natural Conversation) เสมือนนักกฎหมายใจดีที่พร้อมรับฟังและช่วยเหลือประชาชน
-2. รับฟังและเข้าใจความรู้สึกของผู้ใช้อย่างแท้จริง โดยเฉพาะเมื่อผู้ใช้กำลังกังวล เดือดร้อน หรือประสบปัญหาจากการถูกหลอกลวง ละเมิด หรือคุกคาม
-3. อธิบายข้อกฎหมายที่ซับซ้อนให้กลายเป็นภาษาพูดที่คนทั่วไปเข้าใจง่าย หลีกเลี่ยงภาษาทางการที่แข็งทื่อหรืออ่านยาก
+  const systemPrompt = buildSystemPrompt({ matchedLaws, contextLaw, style });
+  const temp = getStyleTemperature(style);
 
-แนวทางการวิเคราะห์คำถามยาวๆ และเรื่องเล่า (Scenario & Narrative Analysis):
-- ผู้ใช้อาจพิมพ์เล่าเหตุการณ์มายาว มีหลายเรื่องหรือตัวละครซ้อนกัน ให้จับใจความสำคัญของเรื่องเล่าและสรุปประเด็นหลักให้ผู้ใช้เห็นว่าคุณเข้าใจสิ่งที่เขาเผชิญอยู่
-- หากในเรื่องมีหลายการกระทำความผิด ให้แยกแยะทีละประเด็นและจับคู่กับมาตรากฎหมายที่เกี่ยวข้องให้ครบถ้วน
-
-โครงสร้างการตอบที่แนะนำ (ให้ตอบอย่างลื่นไหลและเป็นธรรมชาติ):
-1. ทักทายและรับฟังด้วยความเห็นอกเห็นใจ: เริ่มต้นด้วยคำทักทายที่อบอุ่นและแสดงความเข้าใจต่อสถานการณ์ที่เกิดขึ้น
-2. วิเคราะห์ข้อเท็จจริงตามกฎหมาย: อธิบายว่าจากเหตุการณ์ที่เล่ามา การกระทำใดเข้าข่ายผิดกฎหมายใด มาตราใด เพราะเหตุใด (อ้างอิง พ.ร.บ.คอมพิวเตอร์ หรือ PDPA)
-3. บทกำหนดโทษและความรับผิด: ระบุบทลงโทษอย่างชัดเจน (โทษจำคุก, โทษปรับ, หรือค่าเสียหายทางแพ่ง)
-4. คำแนะนำขั้นตอนที่ควรทำทันที (Action Plan): ให้แนวทางปฏิบัติที่เป็นรูปธรรม เช่น การรวบรวมหลักฐาน (แคปหน้าจอแชท สลิป บัญชี URL), การติดต่อธนาคาร/สายด่วน AOC 1441, การแจ้งความออนไลน์ที่ www.thaipoliceonline.go.th
-5. ลงท้ายอย่างพร้อมช่วยเหลือ: ให้กำลังใจและแจ้งว่าหากมีคำถามเพิ่มเติมสามารถพิมพ์ถามได้เสมอ`;
-
-  const lawsToInclude = matchedLaws && matchedLaws.length > 0 
-    ? matchedLaws 
-    : (contextLaw ? [contextLaw] : []);
-
-  if (lawsToInclude.length > 0) {
-    const contextStr = lawsToInclude.map((l, i) => {
-      const catName = l.cat === 'pdpa' ? 'PDPA พ.ศ. 2562' : 'พ.ร.บ.ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์';
-      const penaltyText = l.penalty || 'ไม่มีระบุโทษทางอาญาโดยตรง (อาจมีโทษปรับทางปกครองหรือความรับผิดทางแพ่ง)';
-      return `[มาตราที่เกี่ยวข้อง ${i + 1}] ${catName} มาตรา ${l.section}
-- ชื่อมาตรา/หัวข้อ: ${l.title}
-- ตัวบทกฎหมาย: ${l.text}
-- สรุปสาระสำคัญ: ${l.simple || '-'}
-- บทกำหนดโทษ: ${penaltyText}`;
-    }).join('\n\n');
-
-    systemPrompt += `\n\n[ข้อมูลคลังความรู้กฎหมายอ้างอิงจากฐานข้อมูล (RAG Context)]\n${contextStr}\n\nคำสั่ง: ให้นำข้อมูลมาตรากฎหมายข้างต้นมาประยุกต์และตอบคำถามของผู้ใช้อย่างครบถ้วน เป็นธรรมชาติ และตรงกับเรื่องราวที่ผู้ใช้เล่า`;
-  } else {
-    systemPrompt += `\n\n[หมายเหตุ] ไม่พบมาตราที่ตรงเป้าหมายโดยตรงในระบบ กรุณาตอบอย่างสุภาพ อธิบายหลักการเบื้องต้น และให้คำแนะนำช่องทางการติดต่อช่วยเหลือ เช่น สายด่วน AOC 1441 หรือศูนย์ดำรงธรรม`;
-  }
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: systemPrompt }]
-        },
-        contents: [
-          { parts: [{ text: prompt }] }
-        ],
-        generationConfig: {
-          temperature: 0.6,
-          maxOutputTokens: 1800
-        }
-      }),
-      signal: controller.signal
+  // Construct Gemini contents array including multi-turn history
+  const contents = [];
+  if (Array.isArray(history) && history.length > 0) {
+    history.slice(-8).forEach(item => {
+      if (item && item.content) {
+        contents.push({
+          role: item.role === 'user' ? 'user' : 'model',
+          parts: [{ text: item.content }]
+        });
+      }
     });
+  }
+  contents.push({
+    role: 'user',
+    parts: [{ text: prompt }]
+  });
 
-    clearTimeout(timeoutId);
+  // Try candidate models in order for maximum availability
+  for (const geminiModel of candidateModels) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey.trim()}`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.warn(`⚠️ [Gemini API Error] HTTP ${response.status}:`, errText);
-      return null;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          },
+          contents,
+          generationConfig: {
+            temperature: temp,
+            topP: 0.95,
+            maxOutputTokens: 2048
+          }
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.warn(`⚠️ [Gemini API Warning - ${geminiModel}] HTTP ${response.status}:`, errText);
+        continue; // try next candidate model
+      }
+
+      const data = await response.json();
+      const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (replyText) {
+        return {
+          text: replyText,
+          modelUsed: `Google Gemini (${geminiModel})`,
+          provider: 'Google Gemini AI'
+        };
+      }
+    } catch (err) {
+      console.warn(`⚠️ [Gemini API Exception - ${geminiModel}]:`, err.message);
     }
-
-    const data = await response.json();
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (replyText) {
-      return {
-        text: replyText,
-        modelUsed: `Google Gemini (${geminiModel})`,
-        provider: 'Google Gemini AI'
-      };
-    }
-  } catch (err) {
-    console.warn('⚠️ [Gemini API Call Exception]:', err.message);
   }
 
   return null;
 }
 
-function generateSmartFallbackReply({ prompt, contextLaw }) {
+function sample(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return '';
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateSmartFallbackReply({ prompt, contextLaw, style = 'adaptive' }) {
   const q = prompt.trim().toLowerCase();
 
-  // 1. ทักทาย
+  // 1. ทักทาย (สุ่มรูปแบบให้หลากหลายและเป็นธรรมชาติ)
   if (/^(สวัสดี|หวัดดี|ดีครับ|ดีค่ะ|ฮัลโหล|hello|hi|hey|สลาม|สบายดีไหม|เป็นไงบ้าง)/i.test(q)) {
+    const greetings = [
+      'สวัสดีครับ! มีข้อสงสัยด้าน พ.ร.บ.คอมพิวเตอร์ หรือ PDPA ปรึกษานิติบอทได้เลยครับ ยินดีช่วยเหลือเต็มที่ครับ 😊',
+      'สวัสดีครับ วันนี้มีเหตุการณ์ ข้อกังวล หรือคำถามเรื่องกฎหมายไซเบอร์และข้อมูลส่วนบุคคลตรงไหน สอบถามได้เลยนะครับ',
+      'ยินดีต้อนรับสู่นิติบอทครับ! ไม่ว่าจะเป็นเรื่องถูกแฮก ข้อมูลรั่วไหล หรือการโพสต์บนโซเชียล พิมพ์เล่ามาได้เลยครับ',
+      'สวัสดีครับ ผมพร้อมให้คำแนะนำข้อกฎหมายดิจิทัลเบื้องต้น สามารถพิมพ์คำถามหรือเลือกหัวข้อด่วนได้เลยครับ'
+    ];
     return {
-      text: 'สวัสดีครับ มีข้อสงสัยด้าน พ.ร.บ.คอมพิวเตอร์ หรือ PDPA สอบถามได้เลยครับ',
+      text: sample(greetings),
       simple: 'ทักทายกับผู้ช่วยนิติบอท',
       category: 'บทสนทนาทั่วไป',
       detectedIntent: 'ทักทาย (Greeting)'
@@ -360,8 +413,13 @@ function generateSmartFallbackReply({ prompt, contextLaw }) {
 
   // 2. แนะนำตัว / คุณคือใคร
   if (/(คุณคือใคร|เธอคือใคร|ชื่ออะไร|แนะนำตัว|ใครสร้าง|ผู้พัฒนา|bot คืออะไร)/i.test(q)) {
+    const intros = [
+      'ผมคือ "นิติบอท (Legal Bot)" ผู้ช่วย AI ให้คำปรึกษาด้าน พ.ร.บ.คอมพิวเตอร์ และ PDPA พัฒนาโดย มหาวิทยาลัยราชภัฏนครศรีธรรมราช พร้อมเป็นที่ปรึกษาข้อกฎหมายดิจิทัลให้ประชาชนตลอด 24 ชม. ครับ',
+      'สวัสดีครับ! ผมคือนิติบอท AI ที่ปรึกษาด้านกฎหมายไซเบอร์และคุ้มครองข้อมูลส่วนบุคคลของไทย ยินดีช่วยตรวจเช็กและวินิจฉัยข้อกฎหมายเบื้องต้นครับ',
+      'ผมเป็น AI ผู้ช่วยชื่อ "นิติบอท" คอยตอบคำถาม วิเคราะห์ข้อกฎหมายดิจิทัล และแนะนำแนวทางการปฏิบัติตนเมื่อประสบปัญหาทางออนไลน์ครับ'
+    ];
     return {
-      text: 'ฉันคือ "นิติบอท (Legal Bot)" ผู้ช่วย AI ให้คำปรึกษาด้าน พ.ร.บ.คอมพิวเตอร์ และ PDPA พัฒนาโดย มหาวิทยาลัยราชภัฏนครศรีธรรมราช ครับ',
+      text: sample(intros),
       simple: 'ข้อมูลเกี่ยวกับระบบนิติบอท',
       category: 'ข้อมูลระบบ',
       detectedIntent: 'แนะนำตัว (System Profile)'
@@ -371,9 +429,11 @@ function generateSmartFallbackReply({ prompt, contextLaw }) {
   // 3. ความสามารถ / ทำอะไรได้บ้าง
   if (/(ทำอะไรได้บ้าง|ช่วยอะไรได้|ฟังก์ชัน|วิธีการใช้|ถามอะไรได้บ้าง|help|วิธีใช้)/i.test(q)) {
     return {
-      text: `นิติบอทตอบข้อกฎหมายดิจิทัลได้ทันที:
-• พ.ร.บ.คอมพิวเตอร์ (แฮก, ข้อมูลเท็จ, สแปม, ตัดต่อภาพ, แอบดูข้อมูล)
-• PDPA (สิทธิเจ้าของข้อมูล, ความยินยอม, ข้อมูลรั่วไหล, บทลงโทษ)`,
+      text: `นิติบอทสามารถช่วยคุณในด้านกฎหมายดิจิทัลได้อย่างครอบคลุมครับ:
+• ⚖️ **วิเคราะห์ข้อกฎหมาย พ.ร.บ.คอมพิวเตอร์:** แฮกระบบ, ปลอมแปลงข้อมูล, สแปม, ตัดต่อภาพ, ด่าทอประจาน, ฟิชชิ่ง
+• 🛡️ **กฎหมายคุ้มครองข้อมูลส่วนบุคคล (PDPA):** สิทธิขอให้ลบข้อมูล, การขอความยินยอม (Consent), ข้อมูลลูกค้ารั่วไหล, หน้าที่ของผู้ควบคุมข้อมูล
+• 🚨 **แนวทางปฏิบัติเมื่อเกิดเหตุ:** ขั้นตอนเก็บหลักฐานดิจิทัล, ช่องทางแจ้งความออนไลน์ และสายด่วน AOC 1441
+• 💬 **ตอบตามเหตุการณ์จริง:** เล่าสถานการณ์ที่พบเจอมาได้เลย ผมจะช่วยแยกแยะให้ครับ`,
       simple: 'รายการความสามารถของนิติบอท',
       category: 'ช่วยเหลือและวิธีใช้',
       detectedIntent: 'ช่วยเหลือ (Help & Capabilities)'
@@ -383,10 +443,11 @@ function generateSmartFallbackReply({ prompt, contextLaw }) {
   // 4. แจ้งความออนไลน์ / ศูนย์ AOC 1441 / โดนหลอกโอนเงิน
   if (/(โดนหลอก|แจ้งความ|ตำรวจไซเบอร์|1441|aoc|เบอร์โทร|หลอกโอนเงิน|มิจฉาชีพ)/i.test(q)) {
     return {
-      text: `🚨 คำแนะนำเมื่อตกเป็นเหยื่อมิจฉาชีพออนไลน์:
-1. โทรสายด่วน AOC 1441 ทันทีตลอด 24 ชม. เพื่อระงับ/อายัดบัญชี
-2. แจ้งความออนไลน์ที่ www.thaipoliceonline.go.th
-3. เก็บหลักฐานสลิปโอนเงินและประวัติแชทเพื่อดำเนินคดี`,
+      text: `🚨 **แนวทางเร่งด่วนเมื่อประสบปัญหามิจฉาชีพออนไลน์หรือโอนเงิน:**
+1. 📞 **โทรสายด่วน AOC 1441 ทันที (ตลอด 24 ชม.):** เพื่อทำการอายัดบัญชีปลายทางอย่างเร่งด่วนก่อนเงินจะถูกย้าย
+2. 📸 **รวบรวมหลักฐานดิจิทัล:** แคปภาพหน้าจอแชท, สลิปโอนเงิน (พร้อม QR Code), บัญชีโปรไฟล์คนร้าย, URL และเบอร์โทรศัพท์ที่ติดต่อ
+3. 💻 **แจ้งความออนไลน์อย่างเป็นทางการ:** ผ่านระบบรับแจ้งความออนไลน์ของสำนักงานตำรวจแห่งชาติที่ www.thaipoliceonline.go.th
+4. 🏢 **พบพนักงานสอบสวน:** สามารถนำเลขเคสออนไลน์ไปพบตำรวจที่ สน./สภ. ท้องที่เกิดเหตุได้เลยครับ`,
       simple: 'วิธีรับมือมิจฉาชีพและช่องทางแจ้งความออนไลน์ (AOC 1441)',
       category: 'แจ้งเหตุด่วนไซเบอร์',
       detectedIntent: 'แจ้งความออนไลน์ / ศูนย์ AOC'
@@ -396,7 +457,7 @@ function generateSmartFallbackReply({ prompt, contextLaw }) {
   // 5. วิธีตั้งรหัสผ่านปลอดภัย / ความปลอดภัยไซเบอร์
   if (/(รหัสผ่าน|password|ตั้งพาส|2fa|สองชั้น|ความปลอดภัย|ปลอดภัย)/i.test(q)) {
     return {
-      text: '🔐 แนะนำตั้งรหัสผ่าน 12+ ตัวอักษร ผสมตัวพิมพ์ใหญ่ เล็ก ตัวเลข สัญลักษณ์ และเปิด 2FA เสมอเพื่อความปลอดภัยครับ',
+      text: '🔐 **ข้อแนะนำเพื่อความปลอดภัยของบัญชีออนไลน์:**\n1. ตั้งรหัสผ่านยาวอย่างน้อย 12-16 ตัวอักษร ผสมตัวพิมพ์ใหญ่ เล็ก ตัวเลข และสัญลักษณ์\n2. หลีกเลี่ยงการใช้รหัสผ่านเดียวกันในหลายบริการ\n3. เปิดใช้งานการยืนยันตัวตนแบบ 2 ขั้นตอน (2FA/MFA) เสมอ\n4. ระวังการกดลิงก์แปลกปลอมหรือกรอกข้อมูลในเว็บที่ไม่น่าไว้วางใจครับ',
       simple: 'ข้อแนะนำการตั้งรหัสผ่านและการใช้ 2FA',
       category: 'ความปลอดภัยไซเบอร์',
       detectedIntent: 'คำแนะนำความปลอดภัยรหัสผ่าน'
@@ -405,8 +466,13 @@ function generateSmartFallbackReply({ prompt, contextLaw }) {
 
   // 6. ขอบคุณ / บ๊ายบาย
   if (/(ขอบคุณ|ขอบใจ|thank|thanks|แต๊งกิ้ว)/i.test(q)) {
+    const thanks = [
+      'ยินดีเป็นอย่างยิ่งครับ! หากมีข้อสงสัยหรือมีสถานการณ์ใดเพิ่มเติม ปรึกษาได้ตลอด 24 ชั่วโมงเลยนะครับ 😊',
+      'ด้วยความยินดีครับ! ขอให้ปลอดภัยจากภัยไซเบอร์ มีเรื่องกฎหมายดิจิทัลแวะมาคุยกับนิติบอทได้เสมอนะครับ',
+      'ยินดีรับใช้ครับ! ขอให้ทุกอย่างคลี่คลายไปด้วยดี หากต้องการข้อมูลเพิ่มเติมพิมพ์ถามต่อได้เลยครับ'
+    ];
     return {
-      text: 'ยินดีครับ มีข้อสงสัยด้านกฎหมายสอบถามเพิ่มเติมได้เสมอครับ',
+      text: sample(thanks),
       simple: 'ตอบรับคำขอบคุณ',
       category: 'บทสนทนาทั่วไป',
       detectedIntent: 'ขอบคุณ (Gratitude)'
@@ -414,7 +480,7 @@ function generateSmartFallbackReply({ prompt, contextLaw }) {
   }
   if (/(บาย|ลาก่อน|บ๊าย|goodbye|bye)/i.test(q)) {
     return {
-      text: 'ลาก่อนครับ ยินดีให้บริการเสมอครับ 👋',
+      text: 'ลาก่อนครับ! ขอให้ปลอดภัยบนโลกออนไลน์ ยินดีให้บริการเสมอครับ 👋',
       simple: 'ตอบรับการกล่าวลา',
       category: 'บทสนทนาทั่วไป',
       detectedIntent: 'กล่าวลา (Farewell)'
@@ -424,34 +490,45 @@ function generateSmartFallbackReply({ prompt, contextLaw }) {
   // 7. คำถามเกี่ยวกับ AI, คอมพิวเตอร์, เทคโนโลยีทั่วไป
   if (/(ai คือ|คอมพิวเตอร์|computer|algorithm|software|คลาวด์|cloud|เทคโนโลยี)/i.test(q)) {
     return {
-      text: 'ข้อมูลดิจิทัลและ AI ได้รับการคุ้มครองตาม พ.ร.บ.คอมพิวเตอร์ (ป้องกันการแฮก/ทำลายข้อมูล) และ PDPA (คุ้มครองข้อมูลส่วนบุคคล) ครับ',
+      text: 'เทคโนโลยีและ AI ในปัจจุบันเกี่ยวโยงกับกฎหมายอย่างใกล้ชิดครับ ทั้ง **พ.ร.บ.คอมพิวเตอร์** (ดูแลความมั่นคงปลอดภัยของระบบและห้ามนำเข้าข้อมูลเท็จ/ทำลายระบบ) และ **PDPA** (กำกับดูแลการนำข้อมูลส่วนบุคคลของผู้ใช้ไปเทรนหรือประมวลผล) หากสงสัยมุมไหนเป็นพิเศษ สอบถามได้เลยครับ',
       simple: 'ข้อมูลเทคโนโลยีและการเชื่อมโยงกับกฎหมายดิจิทัล',
       category: 'ความรู้ทั่วไป',
       detectedIntent: 'ความรู้ไอทีทั่วไป'
     };
   }
 
-  // 8. Default Open-ended general question (Warm & Human-like)
-  return {
-    text: `สวัสดีครับ จากเรื่องที่คุณสอบถามเข้ามา นิติบอทขอให้คำแนะนำเบื้องต้นดังนี้ครับ:
+  // 8. Default Open-ended general question (สุ่มมุมมองให้หลากหลาย)
+  const generalPool = [
+    `สวัสดีครับ จากเรื่องที่คุณสอบถามเข้ามา นิติบอทขอสรุปแนวทางเบื้องต้นให้ดังนี้นะครับ:
 
-หากคุณหรือคนใกล้ชิดกำลังประสบปัญหาทางไซเบอร์ เช่น การถูกหลอกลวง ข่มขู่ หรือการถูกละเมิดสิทธิข้อมูลส่วนบุคคล สิ่งที่ควรดำเนินการทันทีคือ:
-1. 📸 **รวบรวมหลักฐานทันที:** แคปภาพหน้าจอข้อความแชท, โปรไฟล์ผู้กระทำผิด, สลิปโอนเงิน หรือบันทึกลิงก์ URL ไว้ให้ชัดเจน
-2. 🚨 **กรณีถูกหลอกลวง/โอนเงิน:** ติดต่อสายด่วน AOC 1441 ได้ตลอด 24 ชั่วโมง เพื่อทำการอายัดบัญชีคนร้าย และแจ้งความออนไลน์ได้ที่ www.thaipoliceonline.go.th
-3. ⚖️ **การวินิจฉัยข้อกฎหมาย:** หากมีรายละเอียดของเหตุการณ์เพิ่มเติม (เช่น ใครทำอะไร โพสต์ที่ไหน เกิดความเสียหายอย่างไร) สามารถพิมพ์เล่าเพิ่มเติมให้ผมช่วยวิเคราะห์มาตราที่เกี่ยวข้องได้เลยนะครับ ยินดีช่วยเหลือครับ 😊`,
+1. 📸 **รวบรวมและรักษาสภาพหลักฐาน:** แคปภาพหน้าจอแชท บันทึกไฟล์ สลิปโอนเงิน หรือบันทึก URL ลิงก์ไว้ให้สมบูรณ์ที่สุด
+2. ⚖️ **วิเคราะห์ข้อกฎหมาย:** หากมีรายละเอียดเพิ่มเติม (เช่น เกิดเหตุกับใคร มีการแบล็กเมล์ หลอกลวง หรือข้อมูลหลุดที่ไหน) พิมพ์บอกรายละเอียดเพิ่มเติมได้เลยนะครับ ผมจะช่วยวิเคราะห์มาตราที่เกี่ยวข้องให้ตรงประเด็นครับ
+3. 🚨 **กรณีฉุกเฉิน:** หากมีความเสียหายทางการเงิน ติดต่อสายด่วน AOC 1441 ทันที หรือแจ้งความออนไลน์ได้ที่ www.thaipoliceonline.go.th ครับ`,
+
+    `ยินดีให้คำปรึกษาครับ สำหรับคำถามดังกล่าว:
+
+ในแง่ของกฎหมายดิจิทัลไทย การพิจารณาความผิดจะดูที่ **"เจตนา"** และ **"ผลกระทบความเสียหาย"** เป็นหลักครับ
+• หากเป็นการกระทำต่อระบบคอมพิวเตอร์หรือข้อมูล จะอยู่ภายใต้ พ.ร.บ.คอมพิวเตอร์
+• หากเป็นการนำข้อมูลของผู้อื่นไปใช้ เผยแพร่ หรือจัดเก็บโดยไม่ได้รับอนุญาต จะเข้าข่าย PDPA
+
+หากคุณกำลังประสบปัญหาหรือมีเคสเฉพาะเจาะจง สามารถเล่าเหตุการณ์เพิ่มเติมมาได้เลยครับ นิติบอทพร้อมช่วยแยกแยะให้ครับ 😊`
+  ];
+
+  return {
+    text: sample(generalPool),
     simple: 'คำแนะนำเบื้องต้นเมื่อพบปัญหาดิจิทัลและช่องทางช่วยเหลือ',
     category: 'ตอบคำถามทั่วไป',
     detectedIntent: 'คำถามทั่วไป (General Inquiry)'
   };
 }
 
-async function processBotResponse({ prompt, contextLaw, matchedLaws = [], model = 'gpt-4o-mini' }) {
+async function processBotResponse({ prompt, contextLaw, matchedLaws = [], model = 'gpt-4o-mini', history = [], style = 'adaptive' }) {
   // 1. ลองเรียก GPT API ถ้ามี OPENAI_API_KEY
-  let aiResult = await callGPTAPI({ prompt, contextLaw, matchedLaws, model });
+  let aiResult = await callGPTAPI({ prompt, contextLaw, matchedLaws, model, history, style });
 
   // 1.1 ถ้า GPT ใช้งานไม่ได้ (เช่น เครดิตหมด / 429) ให้สลับมาใช้ Gemini อัตโนมัติทันที
   if (!aiResult && process.env.GEMINI_API_KEY) {
-    aiResult = await callGeminiAPI({ prompt, contextLaw, matchedLaws, model: process.env.GEMINI_CHAT_MODEL || 'gemini-3.1-flash-lite' });
+    aiResult = await callGeminiAPI({ prompt, contextLaw, matchedLaws, model, history, style });
   }
 
   if (aiResult) {
@@ -459,7 +536,7 @@ async function processBotResponse({ prompt, contextLaw, matchedLaws = [], model 
     let reasoningSteps = [
       `1. คำถาม/สถานการณ์: "${prompt.slice(0, 100)}${prompt.length > 100 ? '...' : ''}"`,
       `2. ตรวจพบมาตราที่เกี่ยวข้อง: ${matchedLaws && matchedLaws.length > 0 ? matchedLaws.map(l => l.section).join(', ') : (primary ? primary.section : 'คำถามทั่วไป')}`,
-      `3. ประมวลผลและให้คำปรึกษาอย่างละเอียดและเป็นธรรมชาติ (${aiResult.provider})`
+      `3. ประมวลผลด้วยโมเดลภาษาขั้นสูง (${aiResult.provider}) [โหมด: ${style}]`
     ];
 
     return {
@@ -484,22 +561,28 @@ async function processBotResponse({ prompt, contextLaw, matchedLaws = [], model 
     let multiSectionInfo = '';
     if (matchedLaws && matchedLaws.length > 1) {
       const others = matchedLaws.slice(1).map(m => `• ${m.cat === 'pdpa' ? 'PDPA' : 'พ.ร.บ.คอมฯ'} มาตรา ${m.section}: ${m.title}`).join('\n');
-      multiSectionInfo = `\n\n📌 **นอกจากนี้ยังอาจเกี่ยวข้องกับมาตราอื่น:**\n${others}`;
+      multiSectionInfo = `\n\n📌 **มาตราอื่นที่อาจเกี่ยวข้องเพิ่มเติม:**\n${others}`;
     }
 
-    const responseText = `สวัสดีครับ จากกรณีที่คุณสอบถามเข้ามา ขอให้คำแนะนำเบื้องต้นดังนี้ครับ:
+    const openings = [
+      `สวัสดีครับ จากกรณีที่คุณสอบถามเข้ามา นิติบอทขอวิเคราะห์และให้คำแนะนำเบื้องต้นดังนี้ครับ:`,
+      `สำหรับข้อสงสัยในประเด็นนี้ มีความเชื่อมโยงกับข้อกฎหมายดิจิทัลไทยโดยตรง ดังนี้ครับ:`,
+      `ยินดีให้คำแนะนำครับ จากสถานการณ์ดังกล่าว มีประเด็นกฎหมายสำคัญที่เกี่ยวข้องดังนี้:`
+    ];
+
+    const responseText = `${sample(openings)}
 
 ⚖️ **การวินิจฉัยข้อกฎหมายที่เกี่ยวข้อง:**
 พฤติกรรมดังกล่าวมีความเชื่อมโยงโดยตรงกับ **${lawCat} ${secNum} (${primary.title})**
 • **สาระสำคัญ:** ${primary.simple || primary.text}
 • **บทกำหนดโทษ:** ${primary.penalty || 'ไม่มีระบุโทษทางอาญาโดยตรง (อาจมีโทษปรับทางปกครองหรือความรับผิดทางแพ่ง)'}${multiSectionInfo}
 
-🛡️ **คำแนะนำและขั้นตอนที่ควรปฏิบัติทันที:**
-1. **รวบรวมพยานหลักฐาน:** แคปภาพหน้าจอข้อความแชท, สลิปการโอนเงิน, โพสต์, หรือลิงก์ URL ที่เกี่ยวข้องไว้ให้ครบถ้วน อย่าเพิ่งลบหรือบล็อกทันที
-2. **ติดต่อหน่วยงานช่วยเหลือ:** หากเป็นกรณีถูกหลอกลวงหรือฉ้อโกงออนไลน์ โทรแจ้งสายด่วน AOC 1441 (ตลอด 24 ชม.) เพื่อระงับธุรกรรมทันที
-3. **แจ้งความดำเนินคดี:** สามารถแจ้งความออนไลน์ได้ที่ www.thaipoliceonline.go.th หรือเข้าพบพนักงานสอบสวนที่สถานีตำรวจใกล้บ้าน
+🛡️ **คำแนะนำและแนวทางปฏิบัติที่ควรทำ:**
+1. **รวบรวมพยานหลักฐานดิจิทัล:** แคปภาพหน้าจอข้อความแชท, สลิปการโอนเงิน, ลิงก์ URL, หรือประวัติบันทึกการเข้าถึงไว้ให้ครบถ้วน อย่าเพิ่งลบทันที
+2. **ติดต่อหน่วยงานช่วยเหลือเร่งด่วน:** หากเป็นกรณีถูกหลอกลวงหรือฉ้อโกงออนไลน์ โทรแจ้งสายด่วน AOC 1441 (ตลอด 24 ชม.) ทันทีเพื่อระงับธุรกรรม
+3. **การแจ้งความดำเนินคดี:** สามารถแจ้งความออนไลน์ได้ที่ www.thaipoliceonline.go.th หรือเข้าพบพนักงานสอบสวนที่สถานีตำรวจในท้องที่เกิดเหตุ
 
-หากต้องการข้อมูลเพิ่มเติมหรือมีข้อสงสัยตรงจุดไหน สามารถพิมพ์สอบถามต่อได้เลยนะครับ ยินดีให้คำแนะนำครับ 😊`;
+หากต้องการเจาะลึกประเด็นไหนหรือมีข้อเท็จจริงเพิ่มเติม สามารถพิมพ์สอบถามต่อได้เลยนะครับ 😊`;
 
     let reasoningSteps = [
       `1. คำถาม: "${prompt.slice(0, 100)}${prompt.length > 100 ? '...' : ''}"`,
@@ -519,8 +602,8 @@ async function processBotResponse({ prompt, contextLaw, matchedLaws = [], model 
     };
   }
 
-  // 3. หากเป็นคำถามทั่วไปและยังไม่มี GPT API Key
-  const fallback = generateSmartFallbackReply({ prompt, contextLaw });
+  // 3. หากเป็นคำถามทั่วไปและยังไม่มี GPT/Gemini API Key
+  const fallback = generateSmartFallbackReply({ prompt, contextLaw, style });
   let reasoningSteps = [
     `1. คำถาม: "${prompt.slice(0, 100)}${prompt.length > 100 ? '...' : ''}"`,
     `2. หมวดหมู่: ${fallback.category || 'คำถามทั่วไป'}`
@@ -683,7 +766,7 @@ app.post('/api/admin/set-gpt-key', requireAdmin, (req, res) => {
 
 // 1. OpenThaiGPT Free API Endpoint Simulation
 app.post('/api/openthaigpt', async (req, res) => {
-  const { prompt, model } = req.body;
+  const { prompt, model, history = [], style = 'adaptive' } = req.body;
   if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
 
   const ragResult = runRAGSearch(prompt);
@@ -691,7 +774,9 @@ app.post('/api/openthaigpt', async (req, res) => {
     prompt,
     contextLaw: ragResult.law,
     matchedLaws: ragResult.matchedLaws,
-    model: model || 'gpt-4o-mini'
+    model: model || 'gpt-4o-mini',
+    history,
+    style
   });
 
   res.json({
@@ -704,7 +789,7 @@ app.post('/api/openthaigpt', async (req, res) => {
 
 // 2. Chat Processing Endpoint (Async with GPT API & Smart Fallback)
 app.post('/api/chat', async (req, res) => {
-  const { message, model = 'gpt-4o-mini' } = req.body;
+  const { message, model = 'gpt-4o-mini', history = [], style = 'adaptive' } = req.body;
   if (!message) return res.status(400).json({ error: 'Message is required' });
 
   const ragResult = runRAGSearch(message);
@@ -712,7 +797,9 @@ app.post('/api/chat', async (req, res) => {
     prompt: message,
     contextLaw: ragResult.law,
     matchedLaws: ragResult.matchedLaws,
-    model
+    model,
+    history,
+    style
   });
 
   // Save to log

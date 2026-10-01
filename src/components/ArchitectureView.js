@@ -218,7 +218,7 @@ export default function ArchitectureView() {
       <div style={s.card}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
           <div>
-            <h3 style={s.title}>⚡ สถาปัตยกรรม RAG Pipeline (React + FastAPI + pgvector + Thai Open GPT)</h3>
+            <h3 style={s.title}>สถาปัตยกรรม RAG Pipeline (React + FastAPI + pgvector + Thai Open GPT)</h3>
             <p style={s.subtitle}>
               ผังการทำงานระบบค้นคืนความรู้และสร้างคำตอบทางกฎหมายดิจิทัล (Grounded Retrieval-Augmented Generation)
             </p>
@@ -239,7 +239,7 @@ export default function ArchitectureView() {
         <div style={s.flowWrap}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: '#7A1F2B', fontFamily: "'Noto Serif Thai', serif" }}>
-              📍 ลำดับขั้นตอนการทำงาน (คลิกที่การ์ดเพื่อดูรายละเอียด):
+                            ลำดับขั้นตอนการทำงาน (คลิกที่การ์ดเพื่อดูรายละเอียด):
             </span>
             <div style={{ display: 'flex', gap: 6 }}>
               {pipelineSteps.map((_, i) => (
@@ -286,7 +286,7 @@ export default function ArchitectureView() {
           {/* Detailed View of Active Step */}
           <div style={{ marginTop: 18, background: '#FAF6ED', border: '1px solid #E4D2A4', borderRadius: 8, padding: 16 }}>
             <h5 style={{ margin: '0 0 6px', color: '#591622', fontFamily: "'Noto Serif Thai', serif", fontSize: 15 }}>
-              🔍 ข้อมูลเชิงลึก: {pipelineSteps[activeStep].title} ({pipelineSteps[activeStep].tech})
+                            ข้อมูลเชิงลึก: {pipelineSteps[activeStep].title} ({pipelineSteps[activeStep].tech})
             </h5>
             <p style={{ margin: '0 0 8px', fontSize: 13, color: '#3d3326', lineHeight: 1.6 }}>
               {pipelineSteps[activeStep].desc}

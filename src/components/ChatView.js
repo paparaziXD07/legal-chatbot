@@ -410,6 +410,59 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+
+  /* Style Selector Bar */
+  styleBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '7px 12px',
+    background: '#FAF5EA',
+    borderBottom: '1px solid #E4D2A4',
+    overflowX: 'auto',
+    scrollbarWidth: 'none'
+  },
+  styleBarLabel: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: '#7A1F2B',
+    whiteSpace: 'nowrap',
+    fontFamily: "'IBM Plex Mono', monospace"
+  },
+  styleBtn: (active) => ({
+    padding: '3px 10px',
+    borderRadius: 14,
+    fontSize: 11.5,
+    fontFamily: "'Sarabun', sans-serif",
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    border: active ? '1.5px solid #7A1F2B' : '1px solid #D8CBB5',
+    background: active ? '#7A1F2B' : '#fff',
+    color: active ? '#fff' : '#4d4233',
+    fontWeight: active ? 700 : 500,
+    boxShadow: active ? '0 1px 4px rgba(122,31,43,0.25)' : 'none',
+    transition: 'all .15s ease'
+  }),
+  followUpRow: {
+    display: 'flex',
+    gap: 6,
+    flexWrap: 'wrap',
+    marginTop: 8,
+    paddingTop: 6,
+    borderTop: '1px dashed #E4D2A4'
+  },
+  followUpChip: {
+    background: '#FAF6EE',
+    border: '1px solid #C9BBA0',
+    borderRadius: 12,
+    padding: '3px 9px',
+    fontSize: 11,
+    color: '#7A1F2B',
+    cursor: 'pointer',
+    fontFamily: "'Sarabun', sans-serif",
+    fontWeight: 600,
+    transition: 'all .15s ease'
   }
 };
 
@@ -418,7 +471,7 @@ function TypingBubble({ modelName }) {
   return (
     <div style={s.msgBot}>
       <div style={s.bubbleBot}>
-        <div style={s.modelTag}>⚡ {modelName} กำลังประมวลผลด้วย RAG...</div>
+        <div style={s.modelTag}>{modelName} กำลังประมวลผลด้วย RAG...</div>
         <div style={s.typing}>
           {[0, 0.2, 0.4].map((delay, i) => (
             <span
@@ -443,7 +496,7 @@ function TypingBubble({ modelName }) {
 export function ChatHero({ onOpenPop }) {
   return (
     <div style={s.heroWrap}>
-      <div style={s.heroBadge}>⚡ RAG + OpenThaiGPT Free API</div>
+      <div style={s.heroBadge}>RAG + OpenThaiGPT Free API</div>
       <h2 style={s.heroTitle}>นิติบอท Pop Chat — ระบบปรึกษากฎหมายดิจิทัล</h2>
       <p style={s.heroSubtitle}>
         แชทบอทตอบคำถาม พ.ร.บ.คอมพิวเตอร์ และ PDPA ถูกเปลี่ยนเป็น <strong>Pop Chat มุมขวาล่างของหน้าจอ</strong>{' '}
@@ -460,13 +513,13 @@ export function ChatHero({ onOpenPop }) {
           </p>
         </div>
         <div style={s.heroCard}>
-          <div style={s.heroCardTitle}>⚡ Quick Chat ในแชท</div>
+          <div style={s.heroCardTitle}>Quick Chat ในแชท</div>
           <p style={s.heroCardText}>
             คำถามด่วนยึดติดอยู่ภายในหน้าต่าง Pop Chat สามารถคลิกถามได้ทันที
           </p>
         </div>
         <div style={s.heroCard}>
-          <div style={s.heroCardTitle}>🧠 AI Engine ประมวลผลเหตุผลขั้นสูง</div>
+          <div style={s.heroCardTitle}>AI Engine ประมวลผลเหตุผลขั้นสูง</div>
           <p style={s.heroCardText}>
             ขับเคลื่อนด้วย OpenThaiGPT R1 (Reasoning CoT) แม่นยำและเก่งที่สุดในการวิเคราะห์กฎหมาย
           </p>
@@ -486,34 +539,46 @@ export function ChatHero({ onOpenPop }) {
   );
 }
 
+function sampleItem(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return '';
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 function getClientGeneralResponse(query) {
   const q = query.trim().toLowerCase();
   if (/^(สวัสดี|หวัดดี|ดีครับ|ดีค่ะ|ฮัลโหล|hello|hi|hey|สบายดีไหม|เป็นไง)/i.test(q)) {
+    const greetings = [
+      'สวัสดีครับ มีข้อสงสัยด้าน พ.ร.บ.คอมพิวเตอร์ หรือ PDPA สอบถามนิติบอทได้เลยครับ ยินดีช่วยเหลือครับ 😊',
+      'สวัสดีครับ! วันนี้มีเหตุการณ์ ข้อกังวล หรือคำถามเรื่องกฎหมายไซเบอร์ตรงไหน พิมพ์ปรึกษาได้ตลอด 24 ชม. ครับ',
+      'ยินดีต้อนรับสู่นิติบอทครับ! ปรึกษาข้อกฎหมายดิจิทัลและสิทธิข้อมูลส่วนบุคคลได้ทันทีเลยครับ'
+    ];
     return {
-      text: 'สวัสดีครับ มีข้อสงสัยด้าน พ.ร.บ.คอมพิวเตอร์ หรือ PDPA สอบถามได้เลยครับ',
+      text: sampleItem(greetings),
       intent: 'ทักทาย (Greeting)'
     };
   }
   if (/(คุณคือใคร|เธอคือใคร|ชื่ออะไร|แนะนำตัว|ใครสร้าง|ผู้พัฒนา)/i.test(q)) {
     return {
-      text: 'ฉันคือ "นิติบอท (Legal Bot)" ผู้ช่วย AI ให้คำปรึกษาด้าน พ.ร.บ.คอมพิวเตอร์ และ PDPA ครับ',
+      text: 'ผมคือ "นิติบอท (Legal Bot)" ผู้ช่วย AI ให้คำปรึกษาด้าน พ.ร.บ.คอมพิวเตอร์ และ PDPA พัฒนาโดย มหาวิทยาลัยราชภัฏนครศรีธรรมราช พร้อมเป็นที่ปรึกษาข้อกฎหมายดิจิทัลให้ประชาชนครับ',
       intent: 'แนะนำตัว (System Profile)'
     };
   }
   if (/(ทำอะไรได้บ้าง|ช่วยอะไรได้|ฟังก์ชัน|วิธีใช้|help)/i.test(q)) {
     return {
-      text: `นิติบอทตอบข้อกฎหมายดิจิทัลได้ทันที:
-• พ.ร.บ.คอมพิวเตอร์ (แฮก, ข้อมูลเท็จ, สแปม, ตัดต่อภาพ, แอบดูข้อมูล)
-• PDPA (สิทธิเจ้าของข้อมูล, ความยินยอม, ข้อมูลรั่วไหล, บทลงโทษ)`,
+      text: `นิติบอทตอบและวิเคราะห์ข้อกฎหมายดิจิทัลได้ทันทีครับ:
+• ⚖️ พ.ร.บ.คอมพิวเตอร์ (แฮก, ข้อมูลเท็จ, สแปม, ตัดต่อภาพ, แอบดูข้อมูล)
+• 🛡️ PDPA (สิทธิเจ้าของข้อมูล, ขอให้ลบ, ความยินยอม, ข้อมูลรั่วไหล)
+• 🚨 ขั้นตอนเก็บหลักฐานดิจิทัล, แจ้งความออนไลน์ และสายด่วน AOC 1441
+• 💬 คุณสามารถเล่าเรื่องราวเหตุการณ์ที่พบเจอมาได้เลยครับ`,
       intent: 'ช่วยเหลือ (Help & Capabilities)'
     };
   }
   if (/(โดนหลอก|แจ้งความ|ตำรวจไซเบอร์|1441|aoc|มิจฉาชีพ)/i.test(q)) {
     return {
-      text: `🚨 คำแนะนำเมื่อตกเป็นเหยื่อมิจฉาชีพออนไลน์:
-1. โทรสายด่วน AOC 1441 ทันทีตลอด 24 ชม. เพื่ออายัดบัญชี
-2. แจ้งความออนไลน์ที่ www.thaipoliceonline.go.th
-3. เตรียมหลักฐานสลิปโอนเงินและประวัติแชทเพื่อดำเนินคดี`,
+      text: `🚨 คำแนะนำเร่งด่วนเมื่อตกเป็นเหยื่อมิจฉาชีพออนไลน์:
+1. โทรสายด่วน AOC 1441 ทันทีตลอด 24 ชม. เพื่อระงับ/อายัดบัญชี
+2. รวบรวมหลักฐานแชท สลิปโอนเงิน บัญชีคนร้าย และ URL
+3. แจ้งความออนไลน์ที่ www.thaipoliceonline.go.th`,
       intent: 'แจ้งความออนไลน์ / ศูนย์ AOC'
     };
   }
@@ -524,37 +589,49 @@ function getClientGeneralResponse(query) {
     };
   }
   if (/(ขอบคุณ|ขอบใจ|thank|thanks)/i.test(q)) {
+    const thanks = [
+      'ยินดีเป็นอย่างยิ่งครับ! หากมีข้อสงสัยหรือเหตุการณ์เพิ่มเติม ปรึกษาได้ตลอดเลยนะครับ 😊',
+      'ด้วยความยินดีครับ! ขอให้ปลอดภัยบนโลกออนไลน์ มีเรื่องกฎหมายดิจิทัลแวะมาคุยได้เสมอนะครับ'
+    ];
     return {
-      text: 'ยินดีครับ มีข้อสงสัยด้านกฎหมายสอบถามเพิ่มเติมได้เสมอครับ',
+      text: sampleItem(thanks),
       intent: 'ขอบคุณ (Gratitude)'
     };
   }
   if (/(บาย|ลาก่อน|goodbye|bye)/i.test(q)) {
     return {
-      text: 'ลาก่อนครับ ยินดีให้บริการเสมอครับ 👋',
+      text: 'ลาก่อนครับ! ขอให้ปลอดภัยบนโลกออนไลน์ ยินดีให้บริการเสมอครับ 👋',
       intent: 'กล่าวลา (Farewell)'
     };
   }
   return {
     text: `สวัสดีครับ จากเรื่องที่คุณสอบถามเข้ามา ขอให้คำแนะนำเบื้องต้นดังนี้ครับ:
 
-หากคุณหรือคนใกล้ชิดกำลังประสบปัญหาทางไซเบอร์ เช่น การถูกหลอกลวง ข่มขู่ หรือการถูกละเมิดสิทธิข้อมูลส่วนบุคคล สิ่งที่ควรดำเนินการทันทีคือ:
-1. 📸 รวบรวมหลักฐานทันที: แคปภาพหน้าจอข้อความแชท, โปรไฟล์ผู้กระทำผิด, สลิปโอนเงิน หรือบันทึกลิงก์ URL ไว้ให้ชัดเจน
-2. 🚨 กรณีถูกหลอกลวง/โอนเงิน: ติดต่อสายด่วน AOC 1441 ได้ตลอด 24 ชั่วโมง เพื่อทำการอายัดบัญชีคนร้าย และแจ้งความออนไลน์ได้ที่ www.thaipoliceonline.go.th
-3. ⚖️ การวินิจฉัยข้อกฎหมาย: หากมีรายละเอียดของเหตุการณ์เพิ่มเติม (เช่น ใครทำอะไร โพสต์ที่ไหน เกิดความเสียหายอย่างไร) สามารถพิมพ์เล่าเพิ่มเติมให้ผมช่วยวิเคราะห์มาตราที่เกี่ยวข้องได้เลยนะครับ ยินดีช่วยเหลือครับ 😊`,
+1. 📸 **รวบรวมหลักฐานทันที:** แคปภาพหน้าจอข้อความแชท, โปรไฟล์ผู้กระทำผิด, สลิปโอนเงิน หรือบันทึกลิงก์ URL ไว้ให้ชัดเจน
+2. 🚨 **กรณีถูกหลอกลวง/โอนเงิน:** ติดต่อสายด่วน AOC 1441 ได้ตลอด 24 ชั่วโมง เพื่อทำการอายัดบัญชีคนร้าย และแจ้งความออนไลน์ได้ที่ www.thaipoliceonline.go.th
+3. ⚖️ **การวินิจฉัยข้อกฎหมาย:** หากมีรายละเอียดของเหตุการณ์เพิ่มเติม สามารถพิมพ์เล่าเพิ่มเติมให้ผมช่วยวิเคราะห์มาตราที่เกี่ยวข้องได้เลยนะครับ ยินดีช่วยเหลือครับ 😊`,
     intent: 'คำถามทั่วไป (General Inquiry)'
   };
 }
 
+export const STYLE_OPTIONS = [
+  { id: 'adaptive', label: '🌟 หลากหลาย', desc: 'วิเคราะห์เป็นธรรมชาติ ยกตัวอย่างเคสและทางออกรอบด้าน' },
+  { id: 'concise', label: '⚡ สรุปสั้น', desc: 'รวบรัด ชี้ชัดมาตราและโทษแบบตรงประเด็น อ่านจบไว' },
+  { id: 'deep', label: '⚖️ เชิงลึก', desc: 'วิเคราะห์องค์ประกอบความผิด ข้อยกเว้น เจตนา และพยานหลักฐาน' },
+  { id: 'friendly', label: '🤝 เป็นกันเอง', desc: 'ภาษาเข้าใจง่าย ให้กำลังใจและแนะแนวทางทีละสเต็ป' }
+];
+
 export default function ChatView({ activeTab, renderHeroOnly = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedModel] = useState('gpt-4o-mini');
+  const [responseStyle, setResponseStyle] = useState('adaptive');
   const [laws, setLaws] = useState([]);
   const [messages, setMessages] = useState([
     {
       role: 'bot',
-      text: 'สวัสดีค่ะ ดิฉันคือนิติบอท (Legal Bot) ผู้ช่วย AI ให้ความรู้ด้านกฎหมาย พ.ร.บ.คอมพิวเตอร์ และ PDPA สามารถตอบคำถามทั่วไปและให้คำปรึกษาข้อกฎหมายได้ตลอด 24 ชม. สามารถพิมพ์คำถาม หรือกดเลือกคำถามด่วนด้านล่างได้เลยนะคะ 😊',
-      modelUsed: 'GPT API & นิติบอท AI Service'
+      text: 'สวัสดีค่ะ ดิฉันคือนิติบอท (Legal Bot) ผู้ช่วย AI ให้ความรู้ด้านกฎหมาย พ.ร.บ.คอมพิวเตอร์ และ PDPA สามารถตอบคำถามทั่วไปและให้คำปรึกษาข้อกฎหมายได้ตลอด 24 ชม. สามารถพิมพ์คำถาม หรือกดเลือกคำถามด่วนด้านล่างได้เลยนะคะ',
+      modelUsed: 'GPT API & นิติบอท AI Service',
+      isWelcome: true
     }
   ]);
   const [inputVal, setInputVal] = useState('');
@@ -578,12 +655,26 @@ export default function ChatView({ activeTab, renderHeroOnly = false }) {
     setMessages((prev) => [...prev, { role: 'user', text: q }]);
     setIsTyping(true);
 
+    // Extract recent conversation history for multi-turn understanding
+    const history = messages
+      .filter((m) => m.text && !m.isWelcome)
+      .slice(-8)
+      .map((m) => ({
+        role: m.role === 'user' ? 'user' : 'assistant',
+        content: m.text
+      }));
+
     try {
-      // Fetch from Express API Gateway
+      // Fetch from Express API Gateway with history and responseStyle
       const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: q, model: selectedModel })
+        body: JSON.stringify({
+          message: q,
+          model: selectedModel,
+          history,
+          style: responseStyle
+        })
       });
 
       if (res.ok) {
@@ -637,7 +728,7 @@ export default function ChatView({ activeTab, renderHeroOnly = false }) {
       if (hit) {
         const secLabel = formatSection(hit.section);
         const catLabel = hit.cat === 'pdpa' ? 'PDPA' : 'พ.ร.บ.คอมพิวเตอร์';
-        botText = `📌 ${hit.title} (${secLabel} ${catLabel})\n• สาระสำคัญ: ${hit.simple || hit.text}\n• บทกำหนดโทษ: ${hit.penalty || 'ไม่มีระบุโทษอาญาโดยตรง'}`;
+        botText = `${hit.title} (${secLabel} ${catLabel})\n• สาระสำคัญ: ${hit.simple || hit.text}\n• บทกำหนดโทษ: ${hit.penalty || 'ไม่มีระบุโทษอาญาโดยตรง'}`;
         detectedIntent = `${secLabel} — ${hit.title}`;
         setMessages((prev) => [
           ...prev,
@@ -729,8 +820,23 @@ export default function ChatView({ activeTab, renderHeroOnly = false }) {
 
             {/* Single Top AI Model Badge */}
             <div style={s.singleModelBadge}>
-              <span>🧠 AI Engine: GPT API + RAG Legal Knowledge Base</span>
+              <span>AI Engine: GPT & Gemini + RAG ({STYLE_OPTIONS.find(st => st.id === responseStyle)?.label || 'หลากหลาย'})</span>
             </div>
+          </div>
+
+          {/* Response Style Selector Bar */}
+          <div style={s.styleBar}>
+            <span style={s.styleBarLabel}>สไตล์การตอบ:</span>
+            {STYLE_OPTIONS.map((st) => (
+              <button
+                key={st.id}
+                style={s.styleBtn(responseStyle === st.id)}
+                onClick={() => setResponseStyle(st.id)}
+                title={st.desc}
+              >
+                {st.label}
+              </button>
+            ))}
           </div>
 
           {/* Message Log */}
@@ -743,7 +849,7 @@ export default function ChatView({ activeTab, renderHeroOnly = false }) {
               ) : (
                 <div key={i} style={s.msgBot}>
                   <div style={s.bubbleBot}>
-                    {m.modelUsed && <div style={s.modelTag}>🤖 {m.modelUsed}</div>}
+                    {m.modelUsed && <div style={s.modelTag}>{m.modelUsed}</div>}
 
                     <div style={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>{m.text}</div>
 
@@ -751,7 +857,7 @@ export default function ChatView({ activeTab, renderHeroOnly = false }) {
                     {m.reasoningSteps && m.reasoningSteps.length > 0 && (
                       <details style={s.cotBox}>
                         <summary style={s.cotSummary}>
-                          <span>🧠</span> ขั้นตอนการประมวลผล AI (คลิกเพื่อดู)
+                          <span>ขั้นตอนการประมวลผล AI</span> (คลิกเพื่อดู)
                         </summary>
                         <ol style={s.cotList}>
                           {m.reasoningSteps.map((step, idx) => (
@@ -769,9 +875,33 @@ export default function ChatView({ activeTab, renderHeroOnly = false }) {
                         </div>
                         {m.penalty && !m.text.includes(m.penalty) && (
                           <div style={s.penaltyBox}>
-                            <strong>⚠️ บทกำหนดโทษ:</strong> {m.penalty}
+                            <strong>บทกำหนดโทษ:</strong> {m.penalty}
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* Smart Interactive Follow-up Suggestions for Diversity */}
+                    {i === messages.length - 1 && !isTyping && (
+                      <div style={s.followUpRow}>
+                        <span style={{ fontSize: 10.5, color: '#8a7a60', alignSelf: 'center', fontWeight: 600 }}>💡 ถามต่อ:</span>
+                        {['มีข้อยกเว้นทางกฎหมายไหม?', 'ต้องเตรียมหลักฐานอะไรบ้าง?', 'โทษทางแพ่งกับอาญาต่างกันอย่างไร?', 'ถ้าไกล่เกลี่ยยอมความได้ไหม?'].map((suggestion, sIdx) => (
+                          <button
+                            key={sIdx}
+                            style={s.followUpChip}
+                            onClick={() => sendMessage(suggestion)}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = '#7A1F2B';
+                              e.currentTarget.style.color = '#fff';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = '#FAF6EE';
+                              e.currentTarget.style.color = '#7A1F2B';
+                            }}
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
                       </div>
                     )}
 
@@ -790,7 +920,7 @@ export default function ChatView({ activeTab, renderHeroOnly = false }) {
           {/* Quick Chat Topics INSIDE Chat Window */}
           <div style={s.quickContainer}>
             <div style={s.quickHeader}>
-              <span>⚡ QUICK CHAT (คำถามด่วน)</span>
+              <span>QUICK CHAT (คำถามด่วน)</span>
             </div>
             <div style={s.quickScrollRow}>
               {QUICK_TOPICS.map((t) => (
@@ -807,7 +937,7 @@ export default function ChatView({ activeTab, renderHeroOnly = false }) {
                     e.currentTarget.style.color = '#3d3326';
                   }}
                 >
-                  📌 {t.label}
+                  {t.label}
                 </button>
               ))}
             </div>

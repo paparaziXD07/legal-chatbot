@@ -20,12 +20,12 @@ export async function fetchLawsFromSupabase() {
     try {
       const { data, error } = await supabaseRest.select('laws', { order: 'id.asc' });
       if (!error && data && data.length > 0) {
-        console.log(`✅ [Supabase Client] Successfully fetched ${data.length} laws from Supabase DB`);
+        console.log(`[Supabase Client] Successfully fetched ${data.length} laws from Supabase DB`);
         cachedLaws = data;
         return data;
       }
       if (error) {
-        console.warn('⚠️ [Supabase Client Error]:', error.message);
+        console.warn('[Supabase Client Error]:', error.message);
       }
     } catch (err) {
       console.warn('⚠️ [Supabase Client Exception]:', err.message);
@@ -38,7 +38,7 @@ export async function fetchLawsFromSupabase() {
     if (res.ok) {
       const data = await res.json();
       if (data && data.length > 0) {
-        console.log(`✅ [Backend API Proxy] Successfully fetched ${data.length} laws from Supabase`);
+        console.log(`[Backend API Proxy] Successfully fetched ${data.length} laws from Supabase`);
         cachedLaws = data;
         return data;
       }
@@ -58,11 +58,11 @@ export async function fetchFaqsFromSupabase() {
     try {
       const { data, error } = await supabaseRest.select('faqs', { order: 'id.asc' });
       if (!error && data && data.length > 0) {
-        console.log(`✅ [Supabase Client] Successfully fetched ${data.length} FAQs from Supabase DB`);
+        console.log(`[Supabase Client] Successfully fetched ${data.length} FAQs from Supabase DB`);
         return data;
       }
       if (error) {
-        console.warn('⚠️ [Supabase Client FAQ Error]:', error.message);
+        console.warn('[Supabase Client FAQ Error]:', error.message);
       }
     } catch (err) {
       console.warn('⚠️ [Supabase Client FAQ Exception]:', err.message);
@@ -74,7 +74,7 @@ export async function fetchFaqsFromSupabase() {
     if (res.ok) {
       const data = await res.json();
       if (data && data.length > 0) {
-        console.log(`✅ [Backend API Proxy] Successfully fetched ${data.length} FAQs from Supabase`);
+        console.log(`[Backend API Proxy] Successfully fetched ${data.length} FAQs from Supabase`);
         return data;
       }
     }
@@ -100,9 +100,9 @@ export async function saveChatLogToSupabase({ userMessage, botResponse, detected
     try {
       const { data, error } = await supabaseRest.insert('chat_logs', payload);
       if (error) {
-        console.warn('⚠️ [Supabase Chat Log Error]:', error.message);
+        console.warn('[Supabase Chat Log Error]:', error.message);
       } else {
-        console.log('✅ [Supabase Chat Log Saved]:', data);
+        console.log('[Supabase Chat Log Saved]:', data);
         return data;
       }
     } catch (err) {
